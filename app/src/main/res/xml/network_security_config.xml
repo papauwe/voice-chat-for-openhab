@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Erlaubt Cleartext-HTTP (z. B. http://192.168.1.10:8080) für openHAB im Heimnetz.
+  Für Zugriff übers Internet bitte einen Reverse-Proxy mit TLS verwenden.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

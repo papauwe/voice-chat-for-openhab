@@ -1,0 +1,4 @@
+<resources>
+    <!-- openHAB-Orange als Icon-Hintergrund (passend zur App-Akzentfarbe) -->
+    <color name="ic_launcher_background">#F97316</color>
+</resources>

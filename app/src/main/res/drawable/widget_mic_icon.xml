@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Komplettes Widget-Icon: oranger Kreis + weisses Mikrofon-Glyph.
+     Als quadratisches 48dp-Drawable in android:src gesetzt und mit
+     scaleType="fitCenter" skaliert -> der Kreis bleibt IMMER rund
+     (auch in nicht-quadratischen Widget-Zellen) und ist zentriert,
+     statt als Hintergrund die komplette Zelle zu ueberdecken. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/widget_mic_bg" />
+    <item
+        android:drawable="@drawable/widget_mic"
+        android:top="8dp"
+        android:bottom="8dp"
+        android:left="8dp"
+        android:right="8dp" />
+</layer-list>

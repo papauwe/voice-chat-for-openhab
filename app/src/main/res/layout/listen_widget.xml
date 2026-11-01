@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Einzelner Mic-Button: Tap startet sofort die Spracherkennung.
+         Das Icon (Kreis + Mic) sitzt in android:src und wird per fitCenter
+         proportional skaliert -> rund statt oval, zentriert, ohne die
+         Label-Flaeche zu belegen. Der Tap-Bereich bleibt die ganze Zelle. -->
+    <ImageView
+        android:id="@+id/widget_mic_button"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="2dp"
+        android:contentDescription="@string/widget_listen_desc"
+        android:scaleType="fitCenter"
+        android:src="@drawable/widget_mic_icon" />
+</FrameLayout>

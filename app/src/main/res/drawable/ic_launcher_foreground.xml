@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!--
+        Gemergtes Icon: Mikrofon-Glyph + drei horizontale Balken
+        (die openHAB-Logo-Marke) als "Sprachwellen" darunter.
+        Alles zentriert im Safe-Area-Bereich (66x66 um 21,21).
+    -->
+    <!-- Mikrofon-Kapsel -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,30c-3.9,0 -7,3.1 -7,7v12c0,3.9 3.1,7 7,7s7,-3.1 7,-7V37C61,33.1 57.9,30 54,30z" />
+    <!-- Mikrofon-Stand -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M68,44h-2.5c-0.8,0 -1.5,0.7 -1.5,1.5v3.5c0,5.5 -4.5,10 -10,10s-10,-4.5 -10,-10v-3.5c0,-0.8 -0.7,-1.5 -1.5,-1.5H40c-0.8,0 -1.5,0.7 -1.5,1.5v3.5c0,7.4 5.5,13.5 12.7,14.4V68h-4.4c-0.8,0 -1.4,0.6 -1.4,1.4v1.2c0,0.8 0.6,1.4 1.4,1.4h14.4c0.8,0 1.4,-0.6 1.4,-1.4v-1.2c0,-0.8 -0.6,-1.4 -1.4,-1.4h-4.4v-4.6c7.2,-0.9 12.7,-7 12.7,-14.4v-3.5C69.5,44.7 68.8,44 68,44z" />
+    <!-- openHAB-Balken: drei gleich breite, abgerundete horizontale Balken -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M39.25,74.5 L68.75,74.5 A1.25,1.25 0 0 1 68.75,77 L39.25,77 A1.25,1.25 0 0 1 39.25,74.5 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M39.25,79 L68.75,79 A1.25,1.25 0 0 1 68.75,81.5 L39.25,81.5 A1.25,1.25 0 0 1 39.25,79 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M39.25,83.5 L68.75,83.5 A1.25,1.25 0 0 1 68.75,86 L39.25,86 A1.25,1.25 0 0 1 39.25,83.5 Z" />
+</vector>

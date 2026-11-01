@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hintergrund des Widget-Buttons: openHAB-Orange, passend zur App-Akzentfarbe.
+     Explizite 48dp-Intrinsic-Size, damit der Kreis (als Layer im Icon) rund bleibt. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#F97316" />
+    <size
+        android:width="48dp"
+        android:height="48dp" />
+</shape>

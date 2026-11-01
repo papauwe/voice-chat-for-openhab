@@ -1,0 +1,38 @@
+# Gradle
+.gradle/
+build/
+**/build/
+
+# Local machine config
+local.properties
+gradle.properties.bak
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# Kotlin
+.kotlin/
+
+# Build artifacts
+*.apk
+*.aab
+captures/
+
+# Signing (never commit keys!)
+*.jks
+*.keystore
+keystore.properties
+
+# Private / home-setup files (not for the public repo)
+.clinerules
+chatgpt_systemMessage.txt
+scene_gutenacht.js
+scene_gutenacht.rule.json
+nohup.out
+
+# OS
+.DS_Store
