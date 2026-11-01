@@ -44,7 +44,7 @@ class ChatViewModelTest {
         client = FakeClient()
         tts = FakeTts()
         speech = FakeSpeech()
-        vm = ChatViewModel(Application(), store, client, tts, speech)
+        vm = ChatViewModel(Application(), store, client, tts, speech, DefaultChatStrings)
     }
 
     @After
@@ -65,7 +65,7 @@ class ChatViewModelTest {
     @Test
     fun `init behaelt vorhandene Conversation-ID`() {
         val store2 = FakeSettingsStore(AppSettings(conversationId = "fixed"))
-        val vm2 = ChatViewModel(Application(), store2, client, tts, speech)
+        val vm2 = ChatViewModel(Application(), store2, client, tts, speech, DefaultChatStrings)
         assertEquals("fixed", vm2.settings.value.conversationId)
     }
 

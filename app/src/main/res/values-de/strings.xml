@@ -1,0 +1,74 @@
+<resources>
+    <string name="app_name">openHAB Voice</string>
+    <string name="widget_listen_desc">Zuhören: Sprachbefehl an openHAB</string>
+
+    <!-- Chat -->
+    <string name="chat_greeting">Hallo! Tippe aufs Mikrofon und frage openHAB etwas – die Antwort erscheint hier und wird vorgelesen. 🎙️</string>
+    <string name="chat_new_conversation">Neue Unterhaltung. Was kann openHAB für dich tun?</string>
+    <string name="unknown_error">Unbekannter Fehler</string>
+    <string name="server_not_configured">Server nicht konfiguriert</string>
+    <string name="typing_indicator">openHAB denkt …</string>
+    <string name="placeholder_listening">Ich höre zu …</string>
+    <string name="placeholder_waiting">Warte auf openHAB …</string>
+    <string name="placeholder_input">Nachricht an openHAB …</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_tts_on">Sprachausgabe an</string>
+    <string name="cd_tts_off">Sprachausgabe aus</string>
+    <string name="cd_clear_chat">Chat leeren</string>
+    <string name="cd_settings">Einstellungen</string>
+    <string name="cd_back">Zurück</string>
+    <string name="cd_send">Senden</string>
+    <string name="cd_stop_listening">Aufnahme stoppen</string>
+    <string name="cd_speak">Sprechen</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_save">Speichern</string>
+    <string name="settings_section_server">openHAB Server</string>
+    <string name="settings_server_url">Server-URL</string>
+    <string name="settings_server_url_hint">z. B. http://192.168.1.10:8080 oder https://openhab.example.org</string>
+    <string name="settings_chat_mode">Chat-Modus</string>
+    <string name="settings_custom_path">Endpoint-Pfad</string>
+    <string name="settings_custom_path_hint">z. B. /rest/habot/chat – POST mit {\"message\": …}</string>
+    <string name="settings_section_auth">Authentifizierung (optional)</string>
+    <string name="settings_api_token">API-Token</string>
+    <string name="settings_api_token_hint">openHAB API-Token (Bearer / X-OpenHAB-Token)</string>
+    <string name="settings_username">Benutzer (Basic Auth)</string>
+    <string name="settings_password">Passwort</string>
+    <string name="settings_section_language">Sprache</string>
+    <string name="settings_tts">Sprachausgabe (TTS)</string>
+    <string name="settings_tts_desc">Antworten vorlesen</string>
+    <string name="settings_stt_language">Sprache der Erkennung</string>
+    <string name="settings_stt_language_hint">BCP-47-Tag, z. B. de-DE oder en-US</string>
+
+    <!-- Chat modes -->
+    <string name="mode_openhab5_label">openHAB 5 Chat</string>
+    <string name="mode_openhab5_desc">Der neue Main-UI-Assistent (LLM), Verlauf serverseitig pro Conversation-ID</string>
+    <string name="mode_habot_label">HABot Chat</string>
+    <string name="mode_habot_desc">POST /rest/habot/chat – braucht das HABot-Add-on</string>
+    <string name="mode_voice_label">Voice Interpreter</string>
+    <string name="mode_voice_desc">POST /rest/voice/interpret?text=… – führt Befehle aus, aber ohne Antworttext</string>
+    <string name="mode_custom_label">Eigener Endpoint</string>
+    <string name="mode_custom_desc">POST &lt;Pfad&gt; mit {\"message\": \"…\"} – Antwort wird aus answer/text/message gelesen</string>
+
+    <!-- Spracherkennung -->
+    <string name="speech_not_available">Keine Spracherkennung auf diesem Gerät verfügbar.</string>
+    <string name="speech_error_audio">Audiofehler bei der Spracherkennung.</string>
+    <string name="speech_error_client">Interner Fehler der Spracherkennung.</string>
+    <string name="speech_error_permissions">Mikrofon-Berechtigung fehlt.</string>
+    <string name="speech_error_network">Netzwerkfehler der Spracherkennung.</string>
+    <string name="speech_error_timeout">Timeout der Spracherkennung.</string>
+    <string name="speech_error_busy">Spracherkennung ist beschäftigt.</string>
+    <string name="speech_error_server">Fehler im Spracherkennungs-Dienst.</string>
+    <string name="speech_error_unknown">Unbekannter Fehler (%1$d).</string>
+    <string name="speech_no_match">Nichts verstanden – bitte nochmal sprechen.</string>
+
+    <!-- Client / API-Texte -->
+    <string name="client_no_server">Keine Server-URL konfiguriert. Bitte zuerst in den Einstellungen setzen.</string>
+    <string name="client_command_sent">✅ Befehl an openHAB gesendet.</string>
+    <string name="client_empty_response">(Leere Antwort vom Server)</string>
+    <string name="client_hint_llm"> - Kein LLM-Interpreter installiert? (Add-on z. B. \"openai\"-HLI, OpenRouter laeuft ueber die OpenAI-API)</string>
+    <string name="client_hint_habot"> - HABot-Add-on auf dem Server installiert? Alternativ Modus aendern.</string>
+    <string name="client_hint_auth"> - Authentifizierung pruefen (Token/Benutzer).</string>
+</resources>

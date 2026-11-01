@@ -8,6 +8,7 @@ import de.openhabvoice.data.ChatMessage
 import de.openhabvoice.data.OpenHabApi
 import de.openhabvoice.data.OpenHabClient
 import de.openhabvoice.data.PrefsSettingsStore
+import de.openhabvoice.data.ResourceOpenHabTexts
 import de.openhabvoice.data.SettingsStore
 import de.openhabvoice.data.stripMarkdown
 import de.openhabvoice.voice.SpeechEngine
@@ -26,18 +27,21 @@ class ChatViewModel(
     clientOverride: OpenHabApi? = null,
     ttsOverride: TtsEngine? = null,
     speechOverride: SpeechEngine? = null,
+    chatStringsOverride: ChatStrings? = null,
 ) : AndroidViewModel(app) {
 
     // Fuer den AndroidViewModelFactory (by viewModels()): er sucht per Reflection
     // nach einem Konstruktor (Application). Kotlin-Default-Parameter erzeugen
     // keinen solchen Ueberladung, daher explizit.
-    constructor(app: Application) : this(app, null, null, null, null)
+    constructor(app: Application) : this(app, null, null, null, null, null)
 
     val settingsStore: SettingsStore = settingsStoreOverride ?: PrefsSettingsStore(app)
 
-    private val clientImpl = clientOverride ?: OpenHabClient { settingsStore.settings.value }
+    private val clientImpl =
+        clientOverride ?: OpenHabClient({ settingsStore.settings.value }, ResourceOpenHabTexts(app))
     private val ttsImpl = ttsOverride ?: TtsManager(app)
     private val speechImpl = speechOverride ?: SpeechInput(app)
+    private val strings = chatStringsOverride ?: ResourceChatStrings(app)
 
     val settings: StateFlow<AppSettings> = settingsStore.settings
 
@@ -53,7 +57,7 @@ class ChatViewModel(
             ChatMessage(
                 id = 0L,
                 role = ChatMessage.Role.ASSISTANT,
-                text = "Hallo! Tippe aufs Mikrofon und frage openHAB etwas – die Antwort erscheint hier und wird vorgelesen. 🎙️"
+                text = strings.greeting
             )
         )
     )
@@ -97,7 +101,7 @@ class ChatViewModel(
                     if (s.ttsEnabled) ttsImpl.speak(stripMarkdown(reply), s.sttLanguage)
                 },
                 onFailure = { e ->
-                    appendMessage(ChatMessage.Role.SYSTEM, "⚠️ ${e.message ?: "Unbekannter Fehler"}")
+                    appendMessage(ChatMessage.Role.SYSTEM, "⚠️ ${e.message ?: strings.unknownError}")
                 }
             )
         }
@@ -112,7 +116,7 @@ class ChatViewModel(
             settingsStore.save(settings.value.copy(conversationId = UUID.randomUUID().toString()))
         }
         _messages.value = listOf(
-            ChatMessage(id = nextId++, role = ChatMessage.Role.ASSISTANT, text = "Neue Unterhaltung. Was kann openHAB für dich tun?")
+            ChatMessage(id = nextId++, role = ChatMessage.Role.ASSISTANT, text = strings.newConversation)
         )
     }
 

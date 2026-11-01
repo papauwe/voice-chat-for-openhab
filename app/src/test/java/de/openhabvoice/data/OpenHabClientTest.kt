@@ -73,9 +73,9 @@ class OpenHabClientTest {
                     MockResponse().setBody("""{"messages":[{"id":1,"role":"OPENHAB","content":"alt"}]}""")
                 else MockResponse().setBody("Die Temperatur liegt bei 21 Grad.")
         }
-        val client = OpenHabClient {
+        val client = OpenHabClient({
             AppSettings(serverUrl = base, chatMode = ChatMode.OPENHAB5_CHAT, conversationId = "abc")
-        }
+        })
         val result = client.send("Wie ist die Temperatur?")
         assertEquals("Die Temperatur liegt bei 21 Grad.", result.getOrThrow())
 
@@ -95,9 +95,9 @@ class OpenHabClientTest {
             firstGet = """{"messages":[{"id":1,"role":"OPENHAB","content":"alt"}]}""",
             laterGet = """{"messages":[{"id":1,"role":"OPENHAB","content":"alt"},{"id":2,"role":"OPENHAB","content":"neu"}]}""",
         )
-        val client = OpenHabClient {
+        val client = OpenHabClient({
             AppSettings(serverUrl = base, chatMode = ChatMode.OPENHAB5_CHAT, conversationId = "abc")
-        }
+        })
         assertEquals("neu", client.send("Mach das Licht an").getOrThrow())
     }
 
@@ -107,9 +107,9 @@ class OpenHabClientTest {
             firstGet = """{"messages":[{"id":1,"role":"TOOL_RETURN","content":"erledigt"}]}""",
             laterGet = """{"messages":[{"id":1,"role":"TOOL_RETURN","content":"erledigt"},{"id":2,"role":"TOOL_RETURN","content":"okay"}]}""",
         )
-        val client = OpenHabClient {
+        val client = OpenHabClient({
             AppSettings(serverUrl = base, chatMode = ChatMode.OPENHAB5_CHAT, conversationId = "abc")
-        }
+        })
         assertEquals("okay", client.send("Licht an").getOrThrow())
     }
 
@@ -119,10 +119,10 @@ class OpenHabClientTest {
             firstGet = """{"messages":[]}""",
             laterGet = """{"messages":[]}""",
         )
-        val client = OpenHabClient {
+        val client = OpenHabClient({
             AppSettings(serverUrl = base, chatMode = ChatMode.OPENHAB5_CHAT, conversationId = "abc")
-        }
-        assertEquals("✅ Befehl an openHAB gesendet.", client.send("Licht an").getOrThrow())
+        })
+        assertEquals("✅ Command sent to openHAB.", client.send("Licht an").getOrThrow())
     }
 
     // ---------- HABot ----------
@@ -130,7 +130,7 @@ class OpenHabClientTest {
     @Test
     fun `habot extrahiert answer-Feld`() = runTest {
         server.enqueue(MockResponse().setBody("""{"answer":"Alles aus"}"""))
-        val client = OpenHabClient { settings(ChatMode.HABOT) }
+        val client = OpenHabClient({ settings(ChatMode.HABOT) })
         assertEquals("Alles aus", client.send("Mach alles aus").getOrThrow())
         val req = server.takeRequest()
         assertEquals("/rest/habot/chat", req.path)
@@ -140,21 +140,21 @@ class OpenHabClientTest {
     @Test
     fun `habot extrahiert text-Feld als Fallback`() = runTest {
         server.enqueue(MockResponse().setBody("""{"text":"Hallo"}"""))
-        val client = OpenHabClient { settings(ChatMode.HABOT) }
+        val client = OpenHabClient({ settings(ChatMode.HABOT) })
         assertEquals("Hallo", client.send("hi").getOrThrow())
     }
 
     @Test
     fun `habot extrahiert message-Feld als Fallback`() = runTest {
         server.enqueue(MockResponse().setBody("""{"message":"Fertig"}"""))
-        val client = OpenHabClient { settings(ChatMode.HABOT) }
+        val client = OpenHabClient({ settings(ChatMode.HABOT) })
         assertEquals("Fertig", client.send("hi").getOrThrow())
     }
 
     @Test
     fun `habot nicht-JSON-Body wird roh zurueckgegeben`() = runTest {
         server.enqueue(MockResponse().setBody("kein json"))
-        val client = OpenHabClient { settings(ChatMode.HABOT) }
+        val client = OpenHabClient({ settings(ChatMode.HABOT) })
         assertEquals("kein json", client.send("hi").getOrThrow())
     }
 
@@ -163,8 +163,8 @@ class OpenHabClientTest {
     @Test
     fun `voice mode URL-encodiert Befehl und liefert Fallback`() = runTest {
         server.enqueue(MockResponse().setBody(""))
-        val client = OpenHabClient { settings(ChatMode.VOICE) }
-        assertEquals("✅ Befehl an openHAB gesendet.", client.send("Lampe Wohnzimmer an").getOrThrow())
+        val client = OpenHabClient({ settings(ChatMode.VOICE) })
+        assertEquals("✅ Command sent to openHAB.", client.send("Lampe Wohnzimmer an").getOrThrow())
         val req = server.takeRequest()
         assertEquals("/rest/voice/interpret?text=Lampe+Wohnzimmer+an", req.path)
         assertEquals("POST", req.method)
@@ -175,7 +175,7 @@ class OpenHabClientTest {
     @Test
     fun `custom mode postet JSON an customPath`() = runTest {
         server.enqueue(MockResponse().setBody("""{"message":"Fertig"}"""))
-        val client = OpenHabClient { settings(ChatMode.CUSTOM, customPath = "/rest/mybridge") }
+        val client = OpenHabClient({ settings(ChatMode.CUSTOM, customPath = "/rest/mybridge") })
         assertEquals("Fertig", client.send("Status").getOrThrow())
         val req = server.takeRequest()
         assertEquals("/rest/mybridge", req.path)
@@ -187,7 +187,7 @@ class OpenHabClientTest {
     @Test
     fun `Token setzt Bearer- und X-OpenHAB-Token-Header`() = runTest {
         server.enqueue(MockResponse().setBody("ok"))
-        val client = OpenHabClient { settings(ChatMode.HABOT, apiToken = "tok123") }
+        val client = OpenHabClient({ settings(ChatMode.HABOT, apiToken = "tok123") })
         client.send("hi")
         val req = server.takeRequest()
         assertEquals("tok123", req.getHeader("X-OpenHAB-Token"))
@@ -197,7 +197,7 @@ class OpenHabClientTest {
     @Test
     fun `Basic-Auth setzt Authorization-Header`() = runTest {
         server.enqueue(MockResponse().setBody("ok"))
-        val client = OpenHabClient { settings(ChatMode.HABOT, username = "u", password = "p") }
+        val client = OpenHabClient({ settings(ChatMode.HABOT, username = "u", password = "p") })
         client.send("hi")
         val req = server.takeRequest()
         assertEquals("Basic dTpw", req.getHeader("Authorization"))
@@ -206,9 +206,9 @@ class OpenHabClientTest {
     @Test
     fun `Basic-Auth ueberschreibt Token-Authorization`() = runTest {
         server.enqueue(MockResponse().setBody("ok"))
-        val client = OpenHabClient {
+        val client = OpenHabClient({
             settings(ChatMode.HABOT, apiToken = "tok123", username = "u", password = "p")
-        }
+        })
         client.send("hi")
         val req = server.takeRequest()
         assertEquals("tok123", req.getHeader("X-OpenHAB-Token"))
@@ -219,10 +219,10 @@ class OpenHabClientTest {
 
     @Test
     fun `fehlende Server-URL schlaegt mit Hinweis fehl`() = runTest {
-        val client = OpenHabClient { settings(ChatMode.HABOT, serverUrl = "") }
+        val client = OpenHabClient({ settings(ChatMode.HABOT, serverUrl = "") })
         val result = client.send("hi")
         assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull()!!.message!!.contains("Keine Server-URL konfiguriert"))
+        assertTrue(result.exceptionOrNull()!!.message!!.contains("No server URL configured"))
         assertEquals(0, server.requestCount)
     }
 
@@ -231,19 +231,19 @@ class OpenHabClientTest {
         // 2x 404: das erste GET (Conversation) und der POST brauchen je eine Antwort
         server.enqueue(MockResponse().setResponseCode(404))
         server.enqueue(MockResponse().setResponseCode(404))
-        val client = OpenHabClient { settings(ChatMode.OPENHAB5_CHAT, conversationId = "abc") }
+        val client = OpenHabClient({ settings(ChatMode.OPENHAB5_CHAT, conversationId = "abc") })
         val msg = client.send("hi").exceptionOrNull()!!.message!!
         assertTrue(msg.startsWith("404"))
-        assertTrue(msg.contains("Kein LLM-Interpreter"))
+        assertTrue(msg.contains("LLM interpreter installed"))
     }
 
     @Test
     fun `401 liefert Authentifizierungs-Hinweis`() = runTest {
         server.enqueue(MockResponse().setResponseCode(401))
-        val client = OpenHabClient { settings(ChatMode.HABOT) }
+        val client = OpenHabClient({ settings(ChatMode.HABOT) })
         val msg = client.send("hi").exceptionOrNull()!!.message!!
         assertTrue(msg.contains("401"))
-        assertTrue(msg.contains("Authentifizierung pruefen"))
+        assertTrue(msg.contains("Check authentication"))
     }
 
     // ---------- deleteConversation ----------
@@ -251,7 +251,7 @@ class OpenHabClientTest {
     @Test
     fun `deleteConversation loescht im openhab5-Modus per DELETE`() = runTest {
         server.enqueue(MockResponse().setResponseCode(200))
-        val client = OpenHabClient { settings(ChatMode.OPENHAB5_CHAT, conversationId = "abc") }
+        val client = OpenHabClient({ settings(ChatMode.OPENHAB5_CHAT, conversationId = "abc") })
         client.deleteConversation()
         val req = server.takeRequest()
         assertEquals("DELETE", req.method)
@@ -260,7 +260,7 @@ class OpenHabClientTest {
 
     @Test
     fun `deleteConversation wird in anderen Modi ignoriert`() = runTest {
-        val client = OpenHabClient { settings(ChatMode.HABOT, conversationId = "abc") }
+        val client = OpenHabClient({ settings(ChatMode.HABOT, conversationId = "abc") })
         client.deleteConversation()
         assertEquals(0, server.requestCount)
     }

@@ -29,7 +29,12 @@ interface OpenHabApi {
  *  - Voice Interpreter: POST /rest/voice/interpret?text=...
  *  - Custom Endpoint:   POST <customPath>            {"message": ...}
  */
-class OpenHabClient(private val settingsProvider: () -> AppSettings) : OpenHabApi {
+class OpenHabClient(
+    private val settingsProvider: () -> AppSettings,
+    textsOverride: OpenHabTexts? = null,
+) : OpenHabApi {
+
+    private val texts = textsOverride ?: DefaultOpenHabTexts
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
@@ -42,7 +47,7 @@ class OpenHabClient(private val settingsProvider: () -> AppSettings) : OpenHabAp
     override suspend fun send(text: String): Result<String> = withContext(Dispatchers.IO) {
         runCatching {
             val s = settingsProvider()
-            require(s.hasServer) { "Keine Server-URL konfiguriert. Bitte zuerst in den Einstellungen setzen." }
+            require(s.hasServer) { texts.noServerConfigured }
 
             val base = s.serverUrl.trim().trimEnd('/')
             val conversationId = s.conversationId.ifBlank { UUID.randomUUID().toString() }
@@ -127,7 +132,7 @@ class OpenHabClient(private val settingsProvider: () -> AppSettings) : OpenHabAp
         lastKnownId: Int
     ): String {
         val messages = fetchConversation(base, s, conversationId)?.optJSONArray("messages")
-            ?: return "✅ Befehl an openHAB gesendet."
+            ?: return texts.commandSent
 
         var lastAssistant = ""
         var lastToolReturn = ""
@@ -145,7 +150,7 @@ class OpenHabClient(private val settingsProvider: () -> AppSettings) : OpenHabAp
         return when {
             lastAssistant.isNotBlank() -> lastAssistant
             lastToolReturn.isNotBlank() -> lastToolReturn
-            else -> "✅ Befehl an openHAB gesendet."
+            else -> texts.commandSent
         }
     }
 
@@ -186,13 +191,13 @@ class OpenHabClient(private val settingsProvider: () -> AppSettings) : OpenHabAp
     private fun extractAnswer(mode: ChatMode, body: String): String {
         if (mode == ChatMode.VOICE) {
             // Der Voice-Interpreter liefert i. d. R. keinen Antworttext.
-            return "✅ Befehl an openHAB gesendet."
+            return texts.commandSent
         }
         if (mode == ChatMode.OPENHAB5_CHAT) {
             // Response ist Klartext (kein JSON)
             return body.trim()
         }
-        if (body.isBlank()) return "(Leere Antwort vom Server)"
+        if (body.isBlank()) return texts.emptyResponse
 
         return try {
             val obj = JSONObject(body)
@@ -207,11 +212,9 @@ class OpenHabClient(private val settingsProvider: () -> AppSettings) : OpenHabAp
 
     private fun describeError(code: Int, body: String, mode: ChatMode): String {
         val hint = when {
-            code == 404 && mode == ChatMode.OPENHAB5_CHAT ->
-                " - Kein LLM-Interpreter installiert? (Add-on z. B. \"openai\"-HLI, OpenRouter laeuft ueber die OpenAI-API)"
-            code == 404 && mode == ChatMode.HABOT ->
-                " - HABot-Add-on auf dem Server installiert? Alternativ Modus aendern."
-            code == 401 || code == 403 -> " - Authentifizierung pruefen (Token/Benutzer)."
+            code == 404 && mode == ChatMode.OPENHAB5_CHAT -> texts.hintNoLlmInterpreter
+            code == 404 && mode == ChatMode.HABOT -> texts.hintNoHabot
+            code == 401 || code == 403 -> texts.hintCheckAuth
             else -> ""
         }
         val detail = body.take(200)

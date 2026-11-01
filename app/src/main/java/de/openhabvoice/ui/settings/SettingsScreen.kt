@@ -36,7 +36,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.openhabvoice.R
 import de.openhabvoice.data.AppSettings
 import de.openhabvoice.data.ChatMode
 
@@ -60,10 +62,10 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Einstellungen") },
+                title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Zurück")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 }
             )
@@ -100,7 +102,7 @@ fun SettingsScreen(
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                         .height(52.dp)
                 ) {
-                    Text("Speichern")
+                    Text(stringResource(R.string.settings_save))
                 }
             }
         }
@@ -113,13 +115,13 @@ fun SettingsScreen(
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            SectionTitle("openHAB Server")
+            SectionTitle(stringResource(R.string.settings_section_server))
 
             OutlinedTextField(
                 value = serverUrl,
                 onValueChange = { serverUrl = it },
-                label = { Text("Server-URL") },
-                supportingText = { Text("z. B. http://192.168.1.10:8080 oder https://openhab.example.org") },
+                label = { Text(stringResource(R.string.settings_server_url)) },
+                supportingText = { Text(stringResource(R.string.settings_server_url_hint)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -129,11 +131,11 @@ fun SettingsScreen(
                 onExpandedChange = { modeMenuOpen = it }
             ) {
                 OutlinedTextField(
-                    value = chatMode.label,
+                    value = stringResource(chatMode.labelRes),
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Chat-Modus") },
-                    supportingText = { Text(chatMode.description) },
+                    label = { Text(stringResource(R.string.settings_chat_mode)) },
+                    supportingText = { Text(stringResource(chatMode.descRes)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modeMenuOpen) },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -147,9 +149,9 @@ fun SettingsScreen(
                         DropdownMenuItem(
                             text = {
                                 Column {
-                                    Text(mode.label)
+                                    Text(stringResource(mode.labelRes))
                                     Text(
-                                        mode.description,
+                                        stringResource(mode.descRes),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -171,48 +173,48 @@ fun SettingsScreen(
                 OutlinedTextField(
                     value = customPath,
                     onValueChange = { customPath = it },
-                    label = { Text("Endpoint-Pfad") },
-                    supportingText = { Text("z. B. /rest/habot/chat – POST mit {\"message\": …}") },
+                    label = { Text(stringResource(R.string.settings_custom_path)) },
+                    supportingText = { Text(stringResource(R.string.settings_custom_path_hint)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
 
-            SectionTitle("Authentifizierung (optional)")
+            SectionTitle(stringResource(R.string.settings_section_auth))
 
             OutlinedTextField(
                 value = apiToken,
                 onValueChange = { apiToken = it },
-                label = { Text("API-Token") },
-                supportingText = { Text("openHAB API-Token (Bearer / X-OpenHAB-Token)") },
+                label = { Text(stringResource(R.string.settings_api_token)) },
+                supportingText = { Text(stringResource(R.string.settings_api_token_hint)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("Benutzer (Basic Auth)") },
+                label = { Text(stringResource(R.string.settings_username)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Passwort") },
+                label = { Text(stringResource(R.string.settings_password)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            SectionTitle("Sprache")
+            SectionTitle(stringResource(R.string.settings_section_language))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Sprachausgabe (TTS)", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.settings_tts), style = MaterialTheme.typography.bodyLarge)
                     Text(
-                        "Antworten vorlesen",
+                        stringResource(R.string.settings_tts_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -223,8 +225,8 @@ fun SettingsScreen(
             OutlinedTextField(
                 value = sttLanguage,
                 onValueChange = { sttLanguage = it },
-                label = { Text("Sprache der Erkennung") },
-                supportingText = { Text("BCP-47-Tag, z. B. de-DE oder en-US") },
+                label = { Text(stringResource(R.string.settings_stt_language)) },
+                supportingText = { Text(stringResource(R.string.settings_stt_language_hint)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -243,3 +245,20 @@ private fun SectionTitle(text: String) {
         modifier = Modifier.padding(top = 8.dp)
     )
 }
+
+/** Anzeigetexte der Chat-Modi als String-Ressourcen (lokalisiert statt im Enum). */
+private val ChatMode.labelRes: Int
+    get() = when (this) {
+        ChatMode.OPENHAB5_CHAT -> R.string.mode_openhab5_label
+        ChatMode.HABOT -> R.string.mode_habot_label
+        ChatMode.VOICE -> R.string.mode_voice_label
+        ChatMode.CUSTOM -> R.string.mode_custom_label
+    }
+
+private val ChatMode.descRes: Int
+    get() = when (this) {
+        ChatMode.OPENHAB5_CHAT -> R.string.mode_openhab5_desc
+        ChatMode.HABOT -> R.string.mode_habot_desc
+        ChatMode.VOICE -> R.string.mode_voice_desc
+        ChatMode.CUSTOM -> R.string.mode_custom_desc
+    }

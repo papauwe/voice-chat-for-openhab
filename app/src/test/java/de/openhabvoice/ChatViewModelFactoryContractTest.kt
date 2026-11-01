@@ -54,6 +54,7 @@ class ChatViewModelFactoryContractTest {
                     de.openhabvoice.data.OpenHabApi::class.java,
                     de.openhabvoice.voice.TtsEngine::class.java,
                     de.openhabvoice.voice.SpeechEngine::class.java,
+                    ChatStrings::class.java,
                 ),
             ),
             ctors.toSet()

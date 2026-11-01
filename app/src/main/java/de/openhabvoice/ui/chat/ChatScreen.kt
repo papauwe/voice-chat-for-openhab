@@ -55,11 +55,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.openhabvoice.ChatViewModel
+import de.openhabvoice.R
 import de.openhabvoice.data.ChatMessage
 import androidx.compose.ui.unit.Dp
 import java.text.SimpleDateFormat
@@ -99,9 +101,9 @@ fun ChatScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("openHAB Voice", style = MaterialTheme.typography.titleLarge)
+                        Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge)
                         Text(
-                            text = if (settings.serverUrl.isBlank()) "Server nicht konfiguriert" else settings.serverUrl,
+                            text = if (settings.serverUrl.isBlank()) stringResource(R.string.server_not_configured) else settings.serverUrl,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -111,14 +113,14 @@ fun ChatScreen(
                     IconButton(onClick = { viewModel.saveSettings(viewModel.settings.value.copy(ttsEnabled = !ttsEnabled)) }) {
                         Icon(
                             imageVector = if (ttsEnabled) Icons.Filled.VolumeUp else Icons.Filled.VolumeOff,
-                            contentDescription = if (ttsEnabled) "Sprachausgabe aus" else "Sprachausgabe an"
+                            contentDescription = if (ttsEnabled) stringResource(R.string.cd_tts_off) else stringResource(R.string.cd_tts_on)
                         )
                     }
                     IconButton(onClick = { viewModel.clearChat() }) {
-                        Icon(Icons.Filled.Delete, contentDescription = "Chat leeren")
+                        Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_clear_chat))
                     }
                     IconButton(onClick = onOpenSettings) {
-                        Icon(Icons.Filled.Settings, contentDescription = "Einstellungen")
+                        Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.cd_settings))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -260,7 +262,7 @@ private fun TypingIndicator() {
                 )
                 Spacer(Modifier.width(10.dp))
                 Text(
-                    "openHAB denkt …",
+                    stringResource(R.string.typing_indicator),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -315,9 +317,9 @@ private fun ChatInputBar(
                     placeholder = {
                         Text(
                             when {
-                                isListening -> "Ich höre zu …"
-                                isSending -> "Warte auf openHAB …"
-                                else -> "Nachricht an openHAB …"
+                                isListening -> stringResource(R.string.placeholder_listening)
+                                isSending -> stringResource(R.string.placeholder_waiting)
+                                else -> stringResource(R.string.placeholder_input)
                             }
                         )
                     },
@@ -352,7 +354,7 @@ private fun ChatInputBar(
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
-                    Icon(Icons.Filled.Send, contentDescription = "Senden")
+                    Icon(Icons.Filled.Send, contentDescription = stringResource(R.string.cd_send))
                 }
             }
         }
@@ -403,7 +405,7 @@ private fun MicButtonContent(
     ) {
         Icon(
             imageVector = if (isListening) Icons.Filled.Stop else Icons.Filled.Mic,
-            contentDescription = if (isListening) "Aufnahme stoppen" else "Sprechen",
+            contentDescription = if (isListening) stringResource(R.string.cd_stop_listening) else stringResource(R.string.cd_speak),
             modifier = Modifier.alpha(if (enabled) 1f else 0.5f)
         )
     }

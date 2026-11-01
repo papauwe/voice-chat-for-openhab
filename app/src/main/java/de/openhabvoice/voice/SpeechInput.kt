@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import de.openhabvoice.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -51,7 +52,7 @@ class SpeechInput(private val context: Context) : SpeechEngine {
         _partial.value = ""
 
         if (!SpeechRecognizer.isRecognitionAvailable(context)) {
-            _error.value = "Keine Spracherkennung auf diesem Gerät verfügbar."
+            _error.value = context.getString(R.string.speech_not_available)
             return
         }
 
@@ -93,17 +94,17 @@ class SpeechInput(private val context: Context) : SpeechEngine {
             _isListening.value = false
             if (error != SpeechRecognizer.ERROR_NO_MATCH && error != SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
                 _error.value = when (error) {
-                    SpeechRecognizer.ERROR_AUDIO -> "Audiofehler bei der Spracherkennung."
-                    SpeechRecognizer.ERROR_CLIENT -> "Interner Fehler der Spracherkennung."
-                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Mikrofon-Berechtigung fehlt."
-                    SpeechRecognizer.ERROR_NETWORK -> "Netzwerkfehler der Spracherkennung."
-                    SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Timeout der Spracherkennung."
-                    SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Spracherkennung ist beschäftigt."
-                    SpeechRecognizer.ERROR_SERVER -> "Fehler im Spracherkennungs-Dienst."
-                    else -> "Unbekannter Fehler ($error)."
+                    SpeechRecognizer.ERROR_AUDIO -> context.getString(R.string.speech_error_audio)
+                    SpeechRecognizer.ERROR_CLIENT -> context.getString(R.string.speech_error_client)
+                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> context.getString(R.string.speech_error_permissions)
+                    SpeechRecognizer.ERROR_NETWORK -> context.getString(R.string.speech_error_network)
+                    SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> context.getString(R.string.speech_error_timeout)
+                    SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> context.getString(R.string.speech_error_busy)
+                    SpeechRecognizer.ERROR_SERVER -> context.getString(R.string.speech_error_server)
+                    else -> context.getString(R.string.speech_error_unknown, error)
                 }
             } else {
-                _error.value = "Nichts verstanden – bitte nochmal sprechen."
+                _error.value = context.getString(R.string.speech_no_match)
             }
         }
 
