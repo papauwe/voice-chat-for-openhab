@@ -1,0 +1,17 @@
+openHAB Voice Chat
+Copyright (c) 2026 Uwe Schuster and contributors
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License 2.0 which is available at
+https://www.eclipse.org/legal/epl-2.0/
+
+SPDX-License-Identifier: EPL-2.0
+
+Third-party dependencies (all under the Apache License 2.0 unless noted):
+- Jetpack Compose / AndroidX (The Android Open Source Project, Apache-2.0)
+- OkHttp (Square, Apache-2.0)
+- kotlinx-coroutines (JetBrains, Apache-2.0)
+- multiplatform-markdown-renderer (Mike Penz, Apache-2.0)
+
+"openHAB" is a trademark of the openHAB Foundation e.V.
+This is an unofficial community project, not affiliated with the openHAB Foundation.
