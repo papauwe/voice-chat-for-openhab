@@ -29,10 +29,6 @@ keystore.properties
 
 # Private / home-setup files (not for the public repo)
 .clinerules
-chatgpt_systemMessage.txt
-scene_gutenacht.js
-scene_gutenacht.rule.json
-nohup.out
 
 # Python dev tools
 __pycache__/

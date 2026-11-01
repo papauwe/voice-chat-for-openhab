@@ -1,4 +1,4 @@
-# openHAB Voice Chat
+# Voice Chat for openHAB
 
 An unofficial, community **voice and chat client for [openHAB](https://www.openhab.org) 5.x**.
 Talk to your smart home: speak or type a question, openHAB (HABot or an LLM-based

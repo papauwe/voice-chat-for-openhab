@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "openHAB Voice Chat"
+rootProject.name = "VoiceChatForOpenHAB"
 include(":app")
