@@ -13,7 +13,7 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 /**
- * Abstraktion der openHAB-REST-Anbindung (testbar, ohne echten Server).
+ * Abstraction of the openHAB REST connection (testable without a real server).
  */
 interface OpenHabApi {
     suspend fun send(text: String): Result<String>
@@ -21,13 +21,13 @@ interface OpenHabApi {
 }
 
 /**
- * Minimale REST-Anbindung an openHAB.
+ * Minimal REST client for openHAB.
  *
- * Unterstuetzt:
- *  - openHAB 5 Chat:    POST /rest/voice/interpreters?conversation=...  (Klartext rein, Klartext raus)
- *  - HABot-Chat:        POST /rest/habot/chat        Klartext rein -> ChatReply-JSON
- *  - Voice Interpreter: POST /rest/voice/interpret?text=...
- *  - Custom Endpoint:   POST <customPath>            {"message": ...}
+ * Supports:
+ *  - openHAB 5 chat:    POST /rest/voice/interpreters?conversation=...  (plain text in, plain text out)
+ *  - HABot chat:        POST /rest/habot/chat        plain text in -> ChatReply JSON
+ *  - Voice interpreter: POST /rest/voice/interpret?text=...
+ *  - Custom endpoint:   POST <customPath>            {"message": ...}
  */
 class OpenHabClient(
     private val settingsProvider: () -> AppSettings,
@@ -35,10 +35,13 @@ class OpenHabClient(
 ) : OpenHabApi {
 
     private val texts = textsOverride ?: DefaultOpenHabTexts
-
     private val client = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(120, TimeUnit.SECONDS)
+        // Important: no silent retry for POST messages - otherwise the same
+        // message could end up twice in the history on a dropped connection
+        // (-> tools being executed twice on the server).
+        .retryOnConnectionFailure(false)
         .build()
 
     private val jsonType = "application/json; charset=utf-8".toMediaType()
@@ -52,7 +55,7 @@ class OpenHabClient(
             val base = s.serverUrl.trim().trimEnd('/')
             val conversationId = s.conversationId.ifBlank { UUID.randomUUID().toString() }
 
-            // Vor dem Senden: letzte bekannte Message-ID merken (fuer den Doppel-Antwort-Fix)
+            // Before sending: remember the last known message ID (duplicate-answer fix)
             val lastKnownId = if (s.chatMode == ChatMode.OPENHAB5_CHAT) {
                 fetchLastMessageId(base, s, conversationId)
             } else -1
@@ -83,8 +86,8 @@ class OpenHabClient(
                     throw IOException("${response.code} - ${describeError(response.code, body, s.chatMode)}")
                 }
                 if (s.chatMode == ChatMode.OPENHAB5_CHAT && body.isBlank()) {
-                    // Leerer Body = z. B. reiner Befehl ohne verbale Antwort.
-                    // Nur NACHRICHTEN AB lastKnownId aus dem Verlauf lesen -> keine alten Antworten doppelt.
+                    // Empty body = e.g. a pure command without a verbal answer.
+                    // Only read messages AFTER lastKnownId from the history -> no duplicated old answers.
                     fetchNewAnswer(base, s, conversationId, lastKnownId)
                 } else {
                     extractAnswer(s.chatMode, body)
@@ -93,7 +96,7 @@ class OpenHabClient(
         }
     }
 
-    /** Ruft die Conversation ab (null, wenn noch nicht vorhanden / Fehler). */
+    /** Fetches the conversation (null if it does not exist yet or on error). */
     private fun fetchConversation(base: String, s: AppSettings, conversationId: String): JSONObject? {
         val request = Request.Builder()
             .url("$base/rest/voice/conversations/$conversationId")
@@ -107,7 +110,7 @@ class OpenHabClient(
         }
     }
 
-    /** Hoechste Message-ID der Conversation (-1, wenn leer/nicht vorhanden). */
+    /** Highest message ID of the conversation (-1 if empty/missing). */
     private fun fetchLastMessageId(base: String, s: AppSettings, conversationId: String): Int {
         val messages = fetchConversation(base, s, conversationId)?.optJSONArray("messages")
             ?: return -1
@@ -120,10 +123,10 @@ class OpenHabClient(
     }
 
     /**
-     * Holt die neue Antwort aus dem Verlauf – aber ausschliesslich Nachrichten,
-     * die NACH unserem POST entstanden sind (id > lastKnownId).
-     * Bevorzugt die letzte OPENHAB-Nachricht, sonst die letzte TOOL_RETURN-Nachricht,
-     * sonst Hinweis "Befehl ausgefuehrt".
+     * Fetches the new answer from the conversation history - but only messages
+     * created AFTER our POST (id > lastKnownId).
+     * Prefers the last OPENHAB message, otherwise the last TOOL_RETURN message,
+     * otherwise the "command sent" hint.
      */
     private fun fetchNewAnswer(
         base: String,
@@ -139,7 +142,7 @@ class OpenHabClient(
         for (i in 0 until messages.length()) {
             val m = messages.optJSONObject(i) ?: continue
             val id = m.optInt("id", -1)
-            if (id <= lastKnownId) continue // alte Nachricht -> ueberspringen
+            if (id <= lastKnownId) continue // old message -> skip
             val role = m.optString("role")
             val content = m.optString("content")
             when {
@@ -154,7 +157,7 @@ class OpenHabClient(
         }
     }
 
-    /** Loescht einen serverseitigen openHAB-5-Verlauf (ignoriert Fehler, z. B. bei anderen Modi). */
+    /** Deletes a server-side openHAB 5 conversation history (ignores errors, e.g. in other modes). */
     override suspend fun deleteConversation(): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             val s = settingsProvider()
@@ -190,11 +193,11 @@ class OpenHabClient(
 
     private fun extractAnswer(mode: ChatMode, body: String): String {
         if (mode == ChatMode.VOICE) {
-            // Der Voice-Interpreter liefert i. d. R. keinen Antworttext.
+            // The voice interpreter usually does not return an answer text.
             return texts.commandSent
         }
         if (mode == ChatMode.OPENHAB5_CHAT) {
-            // Response ist Klartext (kein JSON)
+            // Response is plain text (no JSON)
             return body.trim()
         }
         if (body.isBlank()) return texts.emptyResponse

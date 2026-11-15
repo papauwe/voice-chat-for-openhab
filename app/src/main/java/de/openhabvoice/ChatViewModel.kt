@@ -30,9 +30,9 @@ class ChatViewModel(
     chatStringsOverride: ChatStrings? = null,
 ) : AndroidViewModel(app) {
 
-    // Fuer den AndroidViewModelFactory (by viewModels()): er sucht per Reflection
-    // nach einem Konstruktor (Application). Kotlin-Default-Parameter erzeugen
-    // keinen solchen Ueberladung, daher explizit.
+    // For the AndroidViewModelFactory (by viewModels()): it searches via reflection
+    // for a constructor taking (Application). Kotlin default parameters do not
+    // generate such an overload, hence this explicit secondary constructor.
     constructor(app: Application) : this(app, null, null, null, null, null)
 
     val settingsStore: SettingsStore = settingsStoreOverride ?: PrefsSettingsStore(app)
@@ -65,8 +65,11 @@ class ChatViewModel(
 
     private var nextId = 1L
 
+    /** Counter for consecutive empty replies (indicates a stuck conversation). */
+    private var consecutiveEmptyReplies = 0
+
     init {
-        // Conversation-ID für den openHAB-5-Chat sicherstellen
+        // Ensure a conversation ID for the openHAB 5 chat
         if (settings.value.conversationId.isBlank()) {
             settingsStore.save(settings.value.copy(conversationId = UUID.randomUUID().toString()))
         }
@@ -76,7 +79,7 @@ class ChatViewModel(
         if (isListening.value) {
             speechImpl.stop()
         } else {
-            ttsImpl.stop() // Barge-in: laufende Antwort sofort stummschalten
+            ttsImpl.stop() // Barge-in: immediately mute a running answer
             speechImpl.start(language = settings.value.sttLanguage) { text ->
                 if (text.isNotBlank()) sendText(text)
             }
@@ -96,11 +99,22 @@ class ChatViewModel(
             _isSending.value = false
             answer.fold(
                 onSuccess = { reply ->
+                    consecutiveEmptyReplies =
+                        if (reply.isBlank()) consecutiveEmptyReplies + 1 else 0
+                    // Three empty replies in a row: the server-side conversation
+                    // history is probably stuck with hanging tool calls ->
+                    // reset the conversation so the chat works again.
+                    if (consecutiveEmptyReplies >= 3) {
+                        consecutiveEmptyReplies = 0
+                        clearChat()
+                        appendMessage(ChatMessage.Role.SYSTEM, strings.newConversation)
+                    }
                     appendMessage(ChatMessage.Role.ASSISTANT, reply)
                     val s = settings.value
                     if (s.ttsEnabled) ttsImpl.speak(stripMarkdown(reply), s.sttLanguage)
                 },
                 onFailure = { e ->
+                    consecutiveEmptyReplies = 0
                     appendMessage(ChatMessage.Role.SYSTEM, "⚠️ ${e.message ?: strings.unknownError}")
                 }
             )
@@ -112,8 +126,9 @@ class ChatViewModel(
 
     fun clearChat() {
         viewModelScope.launch {
-            clientImpl.deleteConversation() // serverseitigen Verlauf löschen (openHAB 5)
+            clientImpl.deleteConversation() // delete the server-side history (openHAB 5)
             settingsStore.save(settings.value.copy(conversationId = UUID.randomUUID().toString()))
+            consecutiveEmptyReplies = 0
         }
         _messages.value = listOf(
             ChatMessage(id = nextId++, role = ChatMessage.Role.ASSISTANT, text = strings.newConversation)
