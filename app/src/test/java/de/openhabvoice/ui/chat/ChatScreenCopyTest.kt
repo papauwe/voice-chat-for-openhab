@@ -80,6 +80,7 @@ class ChatScreenCopyTest {
                 override val greeting = "Test greeting"
                 override val newConversation = "New conversation"
                 override val unknownError = "Unknown error"
+                override val commandSent = "Command sent"
             }
         )
     }

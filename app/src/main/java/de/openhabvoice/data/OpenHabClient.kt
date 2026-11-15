@@ -143,7 +143,7 @@ class OpenHabClient(
         val messages = fetchConversation(base, s, conversationId)?.optJSONArray("messages")
             ?: return texts.commandSent
 
-        var lastAssistant = ""
+        var lastOpenhab: String? = null
         var lastToolReturn = ""
         for (i in 0 until messages.length()) {
             val m = messages.optJSONObject(i) ?: continue
@@ -152,12 +152,15 @@ class OpenHabClient(
             val role = m.optString("role")
             val content = m.optString("content")
             when {
-                role == "OPENHAB" && content.isNotBlank() -> lastAssistant = content
+                // Keep the RAW content: a blank OPENHAB message means the model
+                // ran a tool without producing a verbal answer. The caller must
+                // be able to detect that (empty-answer counter / auto reset).
+                role == "OPENHAB" -> lastOpenhab = content
                 role == "TOOL_RETURN" && content.isNotBlank() -> lastToolReturn = content
             }
         }
         return when {
-            lastAssistant.isNotBlank() -> lastAssistant
+            lastOpenhab != null -> lastOpenhab
             lastToolReturn.isNotBlank() -> lastToolReturn
             else -> texts.commandSent
         }

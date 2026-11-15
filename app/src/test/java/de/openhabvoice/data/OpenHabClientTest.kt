@@ -125,6 +125,20 @@ class OpenHabClientTest {
         assertEquals("✅ Command sent to openHAB.", client.send("Licht an").getOrThrow())
     }
 
+    @Test
+    fun `openhab5 with blank OPENHAB message returns blank answer`() = runTest {
+        // A blank OPENHAB message = tool ran, but no verbal answer. The raw blank
+        // value must reach the caller so the empty-answer counter can detect it.
+        server.dispatcher = conversationDispatcher(
+            firstGet = """{"messages":[{"id":1,"role":"OPENHAB","content":"alt"}]}""",
+            laterGet = """{"messages":[{"id":1,"role":"OPENHAB","content":"alt"},{"id":2,"role":"OPENHAB","content":""}]}""",
+        )
+        val client = OpenHabClient({
+            AppSettings(serverUrl = base, chatMode = ChatMode.OPENHAB5_CHAT, conversationId = "abc")
+        })
+        assertEquals("", client.send("Wie ist die Temperatur?").getOrThrow())
+    }
+
     // ---------- HABot ----------
 
     @Test

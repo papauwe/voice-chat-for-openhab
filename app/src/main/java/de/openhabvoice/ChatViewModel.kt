@@ -106,12 +106,15 @@ class ChatViewModel(
                     // reset the conversation so the chat works again.
                     if (consecutiveEmptyReplies >= 3) {
                         consecutiveEmptyReplies = 0
-                        clearChat()
-                        appendMessage(ChatMessage.Role.SYSTEM, strings.newConversation)
+                        clearChat() // shows the "new conversation" message itself
                     }
-                    appendMessage(ChatMessage.Role.ASSISTANT, reply)
+                    // Show a fallback text for empty turns (e.g. a command that
+                    // produced no verbal answer) instead of a blank bubble.
+                    appendMessage(ChatMessage.Role.ASSISTANT, reply.ifBlank { strings.commandSent })
                     val s = settings.value
-                    if (s.ttsEnabled) ttsImpl.speak(stripMarkdown(reply), s.sttLanguage)
+                    if (s.ttsEnabled && reply.isNotBlank()) {
+                        ttsImpl.speak(stripMarkdown(reply), s.sttLanguage)
+                    }
                 },
                 onFailure = { e ->
                     consecutiveEmptyReplies = 0

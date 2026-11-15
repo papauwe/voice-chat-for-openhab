@@ -144,6 +144,62 @@ class ChatViewModelTest {
         assertEquals(1, vm.messages.value.size)
     }
 
+    // ---------- Auto-Reset nach leeren Antworten ----------
+
+    @Test
+    fun `three empty replies in a row reset the conversation`() = runTest {
+        val oldId = store.settings.value.conversationId
+        client.resultQueue.addLast(Result.success(""))
+        client.resultQueue.addLast(Result.success(""))
+        client.resultQueue.addLast(Result.success(""))
+        vm.sendText("Frage 1"); advanceUntilIdle()
+        vm.sendText("Frage 2"); advanceUntilIdle()
+        vm.sendText("Frage 3"); advanceUntilIdle()
+        assertTrue("deleteConversation sollte aufgerufen werden", client.deleted)
+        assertTrue("neue Conversation-ID erwartet", store.settings.value.conversationId != oldId)
+        // clearChat setzt den Verlauf zurueck, haengt die Info-Nachricht und die
+        // (leere) Antwort an -> genau zwei Nachrichten nach dem Reset.
+        assertEquals(2, vm.messages.value.size)
+    }
+
+    @Test
+    fun `two empty replies followed by a real answer do not reset`() = runTest {
+        val oldId = store.settings.value.conversationId
+        client.resultQueue.addLast(Result.success(""))
+        client.resultQueue.addLast(Result.success(""))
+        client.resultQueue.addLast(Result.success("Antwort"))
+        vm.sendText("Frage 1"); advanceUntilIdle()
+        vm.sendText("Frage 2"); advanceUntilIdle()
+        vm.sendText("Frage 3"); advanceUntilIdle()
+        assertFalse("kein Reset bei unterbrochener Serie", client.deleted)
+        assertEquals(oldId, store.settings.value.conversationId)
+        assertEquals("Antwort", lastMsg.text)
+    }
+
+    @Test
+    fun `failure interrupts the empty-reply counter`() = runTest {
+        client.resultQueue.addLast(Result.success(""))
+        client.resultQueue.addLast(Result.failure(IOException("offline")))
+        client.resultQueue.addLast(Result.success(""))
+        vm.sendText("Frage 1"); advanceUntilIdle()
+        vm.sendText("Frage 2"); advanceUntilIdle()
+        vm.sendText("Frage 3"); advanceUntilIdle()
+        assertFalse("Fehler soll den Zaehler zuruecksetzen", client.deleted)
+    }
+
+    @Test
+    fun `blank reply shows fallback text and counts towards reset`() = runTest {
+        client.result = Result.success("")
+        vm.sendText("Frage")
+        advanceUntilIdle()
+        assertEquals(DefaultChatStrings.commandSent, lastMsg.text)
+        assertFalse(client.deleted)
+        client.result = Result.success("Antwort")
+        vm.sendText("Nochmal")
+        advanceUntilIdle()
+        assertFalse("interrupted series -> no reset", client.deleted)
+    }
+
     // ---------- saveSettings ----------
 
     @Test
@@ -191,11 +247,14 @@ class ChatViewModelTest {
 
     private class FakeClient : OpenHabApi {
         var result: Result<String> = Result.success("Antwort")
+
+        /** Wenn gefuellt, wird vor [result] abgearbeitet (fuer Serien von Antworten). */
+        val resultQueue = ArrayDeque<Result<String>>()
         var lastText: String? = null
         var deleted = false
         override suspend fun send(text: String): Result<String> {
             lastText = text
-            return result
+            return if (resultQueue.isNotEmpty()) resultQueue.removeFirst() else result
         }
         override suspend fun deleteConversation(): Result<Unit> {
             deleted = true

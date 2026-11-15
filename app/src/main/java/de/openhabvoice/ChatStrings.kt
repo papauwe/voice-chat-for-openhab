@@ -13,6 +13,7 @@ interface ChatStrings {
     val greeting: String
     val newConversation: String
     val unknownError: String
+    val commandSent: String
 }
 
 object DefaultChatStrings : ChatStrings {
@@ -20,10 +21,12 @@ object DefaultChatStrings : ChatStrings {
         "Hi! Tap the microphone and ask openHAB something - the answer appears here and is read aloud. 🎙️"
     override val newConversation = "New conversation. What can openHAB do for you?"
     override val unknownError = "Unknown error"
+    override val commandSent = "✅ Command sent to openHAB."
 }
 
 class ResourceChatStrings(private val context: Context) : ChatStrings {
     override val greeting get() = context.getString(R.string.chat_greeting)
     override val newConversation get() = context.getString(R.string.chat_new_conversation)
     override val unknownError get() = context.getString(R.string.unknown_error)
+    override val commandSent get() = context.getString(R.string.client_command_sent)
 }
