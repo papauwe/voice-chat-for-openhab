@@ -6,26 +6,26 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Vertrags-Test fuer die ViewModel-Erzeugung: MainActivity erzeugt den ViewModel
- * via `by viewModels()` -> AndroidViewModelFactory sucht per Reflection nach einem
- * Konstruktor, der genau (Application) nimmt. Kotlin-Default-Parameter erzeugen
- * KEINE solche Ueberladung -> ohne expliziten Sekundaerkonstruktor crasht der
- * App-Start mit NoSuchMethodException (siehe Crash vom 31.10.).
+ * Contract test for ViewModel creation: MainActivity creates the ViewModel
+ * via `by viewModels()` -> AndroidViewModelFactory searches via reflection for a
+ * constructor taking exactly (Application). Kotlin default parameters do NOT
+ * generate such an overload -> without an explicit secondary constructor the
+ * app crashes on startup with NoSuchMethodException (see crash from 31.10.).
  *
- * Die Unit-Tests mit Constructor-Injection wuerden diesen Fehler NICHT finden,
- * weil sie den 5-Parameter-Konstruktor direkt aufrufen.
+ * The unit tests with constructor injection would NOT find this bug because
+ * they call the 5-parameter constructor directly.
  */
 class ChatViewModelFactoryContractTest {
 
     @Test
-    fun `ChatViewModel hat einen Konstruktor, der nur Application nimmt`() {
+    fun `ChatViewModel has a constructor taking only Application`() {
         val ctors = ChatViewModel::class.java.constructors
         val appCtors = ctors.filter {
             it.parameterTypes.size == 1 && it.parameterTypes[0] == Application::class.java
         }
         assertTrue(
-            "ChatViewModel braucht einen expliziten Konstruktor (Application) " +
-                "fuer die AndroidViewModelFactory. Vorhandene Signaturen: " +
+            "ChatViewModel needs an explicit (Application) constructor " +
+                "for the AndroidViewModelFactory. Existing signatures: " +
                 ctors.joinToString(" | ") { c ->
                     c.parameterTypes.joinToString(",") { p -> p.simpleName }
                 },
@@ -34,10 +34,10 @@ class ChatViewModelFactoryContractTest {
     }
 
     @Test
-    fun `der Application-Konstruktor ist der einzige Einstiegspunkt neben dem Full-Konstruktor`() {
-        // Kotlin erzeugt fuer Default-Parameter im Hauptkonstruktor zusaetzlich einen
-        // synthetischen Konstruktor mit (int, DefaultConstructorMarker) - der ist
-        // fuer die AndroidViewModelFactory irrelevant und wird hier gefiltert.
+    fun `the Application constructor is the only entry point besides the full constructor`() {
+        // For default parameters in the primary constructor Kotlin additionally
+        // generates a synthetic constructor with (int, DefaultConstructorMarker) -
+        // irrelevant for the AndroidViewModelFactory and filtered out here.
         val ctors = ChatViewModel::class.java.constructors
             .filterNot { c ->
                 val last = c.parameterTypes.lastOrNull()

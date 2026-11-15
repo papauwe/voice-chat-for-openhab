@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
             OpenHabVoiceTheme {
                 var showSettings by remember { mutableStateOf(false) }
 
-                // Widget-Aufruf: beim Öffnen sofort mit dem Zuhören beginnen
+                // Widget invocation: start listening immediately on open
                 if (intent.getBooleanExtra(EXTRA_AUTO_START_LISTENING, false)) {
                     AutoStartListeningEffect(viewModel)
                 }
@@ -54,14 +54,14 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
-        /** Extra-Flag vom Home-Screen-Widget: Spracherkennung sofort starten. */
+        /** Extra flag from the home screen widget: start speech recognition immediately. */
         const val EXTRA_AUTO_START_LISTENING = "de.openhabvoice.AUTO_START_LISTENING"
     }
 }
 
 /**
- * Prueft die Mikrofon-Berechtigung und startet direkt die Spracherkennung.
- * Wird durch das Widget-Extra [MainActivity.EXTRA_AUTO_START_LISTENING] ausgeloest.
+ * Checks the microphone permission and starts speech recognition right away.
+ * Triggered by the widget extra [MainActivity.EXTRA_AUTO_START_LISTENING].
  */
 @Composable
 private fun AutoStartListeningEffect(viewModel: ChatViewModel) {

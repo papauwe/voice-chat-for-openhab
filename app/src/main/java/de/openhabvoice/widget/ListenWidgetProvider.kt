@@ -10,11 +10,11 @@ import de.openhabvoice.MainActivity
 import de.openhabvoice.R
 
 /**
- * 1x1-Home-Screen-Widget: einzelner Mikrofon-Button.
+ * 1x1 home screen widget: a single microphone button.
  *
- * Tap startet [MainActivity] mit Extra
- * [MainActivity.EXTRA_AUTO_START_LISTENING] – die App beginnt dann
- * unmittelbar mit der Spracherkennung (inkl. Berechtigungs-Handling).
+ * Tapping starts [MainActivity] with the extra
+ * [MainActivity.EXTRA_AUTO_START_LISTENING] - the app then starts
+ * speech recognition immediately (including permission handling).
  */
 class ListenWidgetProvider : AppWidgetProvider() {
 

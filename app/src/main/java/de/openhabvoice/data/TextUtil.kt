@@ -1,48 +1,48 @@
 package de.openhabvoice.data
 
 /**
- * Entfernt Markdown-Formatierung fuer die Sprachausgabe (TTS),
- * damit keine "Sternchen" oder Syntaxzeichen vorgelesen werden.
- * Fuer die Anzeige wird der Rohtext belassen (Markdown-Renderer).
+ * Strips Markdown formatting for text-to-speech (TTS) so that no
+ * "asterisks" or syntax characters are read aloud.
+ * For display the raw text is kept (Markdown renderer).
  */
 fun stripMarkdown(text: String): String {
     var t = text
 
-    // Trennzeilen der Tabelle (|---|---|) inkl. Zeilenumbruch entfernen – VOR der
-    // Zeilen-Konvertierung, damit keine Leerzeile / kein "---, ---" stehen bleibt
+    // Remove table separator rows (|---|---|) including the line break - BEFORE
+    // the line conversion, so no empty line or "---, ---" is left behind
     t = t.replace(Regex("(?m)^\\s*\\|[\\s\\-:|]+\\|\\s*(?:\\r?\\n|$)"), "")
-    // Tabellen in Satzbau umwandeln: "| a | b |" -> "a, b" pro Zeile
+    // Convert table rows into sentences: "| a | b |" -> "a, b" per row
     t = t.replace(Regex("(?m)^\\s*\\|(.*)\\|\\s*$")) { m ->
         m.groupValues[1].split('|').joinToString(", ") { it.trim() }.removeSuffix(", ")
     }
-    // Code-Bloecke: nur Inhalt
+    // Code blocks: keep the content only
     t = t.replace(Regex("```[a-zA-Z]*\\n?([\\s\\S]*?)```")) { it.groupValues[1].trim() }
-    // Inline-Code
+    // Inline code
     t = t.replace(Regex("`([^`]*)`")) { it.groupValues[1] }
-    // Links [Text](URL) -> Text
+    // Links [text](URL) -> text
     t = t.replace(Regex("\\[([^\\]]+)\\]\\([^)]*\\)")) { it.groupValues[1] }
-    // Ueberschriften-Marker
+    // Heading markers
     t = t.replace(Regex("(?m)^#{1,6}\\s+"), "")
-    // Bullet-Marker
+    // Bullet markers
     t = t.replace(Regex("(?m)^\\s*[-*+]\\s+"), "")
-    // Fett / Kursiv
+    // Bold / italic
     t = t.replace(Regex("\\*\\*([^*]+)\\*\\*")) { it.groupValues[1] }
     t = t.replace(Regex("__([^_]+)__")) { it.groupValues[1] }
     t = t.replace(Regex("\\*([^*\\n]+)\\*")) { it.groupValues[1] }
     t = t.replace(Regex("(?<!\\w)_([^_\\n]+)_(?!\\w)")) { it.groupValues[1] }
-    // Emoji & Symbole entfernen (TTS liest sonst Dinge wie "weisses Haeckchen" vor):
-    // BMP-Symbole (2600-27BF, 2B00-2BFF, 2190-21FF), Variation Selector (FE0F),
-    // Zero-Width-Joiner (200D), lone Surrogates (D800-DFFF) und astral Emoji (10000-10FFFF).
-    // Wichtig: astral Emoji (z. B. 💡) als Surrogate-Paar nur per \x{10000}-\x{10FFFF} erfassbar –
-    // die BMP-Klasse [\uD800-\uDFFF] matcht keine Haelften gueltiger Paare.
+    // Remove emojis & symbols (TTS would otherwise read out things like "white check mark"):
+    // BMP symbols (2600-27BF, 2B00-2BFF, 2190-21FF), variation selector (FE0F),
+    // zero-width joiner (200D), lone surrogates (D800-DFFF) and astral emoji (10000-10FFFF).
+    // Important: astral emoji (e.g. 💡) as a surrogate pair can only be matched via \x{10000}-\x{10FFFF} -
+    // the BMP class [\uD800-\uDFFF] does not match the halves of valid pairs.
     t = t.replace(
         Regex("[\\uD800-\\uDFFF\\u2190-\\u21FF\\u2600-\\u27BF\\u2B00-\\u2BFF\\uFE0F\\u200D\\x{10000}-\\x{10FFFF}]"),
         ""
     )
-    // Doppelte Leerzeichen nach Emoji-Entfernung bereinigen
+    // Clean up double spaces after emoji removal
     t = t.replace(Regex("  +"), " ")
 
-    // Doppelte Leerzeilen zusammenfassen
+    // Collapse duplicate blank lines
     t = t.replace(Regex("\\n{3,}"), "\n\n")
 
     return t.trim()

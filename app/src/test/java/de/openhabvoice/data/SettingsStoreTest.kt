@@ -10,7 +10,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * Robolectric-Tests fuer PrefsSettingsStore: Persistenz-Roundtrip ueber SharedPreferences.
+ * Robolectric tests for PrefsSettingsStore: persistence round-trip via SharedPreferences.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
@@ -25,7 +25,7 @@ class SettingsStoreTest {
     }
 
     @Test
-    fun `speichert und laedt alle Felder korrekt`() {
+    fun `saves and loads all fields correctly`() {
         PrefsSettingsStore(context).save(
             AppSettings(
                 serverUrl = "  http://192.168.1.10:8080  ",
@@ -52,7 +52,7 @@ class SettingsStoreTest {
     }
 
     @Test
-    fun `leere Prefs liefern Defaults`() {
+    fun `empty prefs return defaults`() {
         val s = PrefsSettingsStore(context).settings.value
         assertEquals("", s.serverUrl)
         assertEquals(ChatMode.OPENHAB5_CHAT, s.chatMode)
@@ -62,7 +62,7 @@ class SettingsStoreTest {
     }
 
     @Test
-    fun `ungueltiger ChatMode in Prefs faellt auf OPENHAB5_CHAT zurueck`() {
+    fun `invalid ChatMode in prefs falls back to OPENHAB5_CHAT`() {
         context.getSharedPreferences("openhab_voice_prefs", Context.MODE_PRIVATE)
             .edit().putString("chat_mode", "GIBTS_NICHT").commit()
         val s = PrefsSettingsStore(context).settings.value

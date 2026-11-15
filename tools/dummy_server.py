@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """
-Lokaler openHAB-Dummy-Server zum Testen der App ohne echten openHAB-Server.
+Local openHAB dummy server for testing the app without a real openHAB server.
 
-Emuliert die Endpunkte, die OpenHabClient.kt nutzt:
-  - POST /rest/voice/interpreters?conversation=<id>   (openHAB-5-Chat, Klartext-Antwort)
-  - GET  /rest/voice/conversations/<id>               (Verlauf als JSON mit messages[])
-  - DELETE /rest/voice/conversations/<id>             (Verlauf loeschen)
-  - POST /rest/habot/chat                             (Klartext rein -> {"answer": ...})
-  - POST /rest/voice/interpret?text=...               (Voice Interpreter, keine Antwort)
-  - POST /rest/chat (Custom-Modus)                    ({"message":...} -> {"answer":...})
+Emulates the endpoints used by OpenHabClient.kt:
+  - POST /rest/voice/interpreters?conversation=<id>   (openHAB 5 chat, plain-text answer)
+  - GET  /rest/voice/conversations/<id>               (history as JSON with messages[])
+  - DELETE /rest/voice/conversations/<id>             (delete history)
+  - POST /rest/habot/chat                             (plain text in -> {"answer": ...})
+  - POST /rest/voice/interpret?text=...               (voice interpreter, no answer)
+  - POST /rest/chat (custom mode)                     ({"message":...} -> {"answer":...})
 
 Start:  python3 tools/dummy_server.py [port]
-App-Einstellung "Server-URL" im Emulator: http://10.0.2.2:8080
-(10.0.2.2 = localhost des Host-Rechners aus Sicht des Android-Emulators)
+App setting "Server URL" in the emulator: http://10.0.2.2:8080
+(10.0.2.2 = the host machine's localhost as seen from the Android emulator)
 """
 import json
 import re
@@ -22,7 +22,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
 
 # --------------------------------------------------------------------------
-# "Intelligenz" des Dummies: einfache Muster auf plausible openHAB-Antworten
+# "Intelligence" of the dummy: simple patterns mapped to plausible openHAB answers
 # --------------------------------------------------------------------------
 RULES = [
     (r"(?i)\bhallo\b|guten (tag|morgen|abend)", "Hallo! Wie kann ich helfen? 🤖"),
@@ -57,7 +57,7 @@ class OpenHabDummyHandler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         print(f"[dummy] {self.address_string()} {fmt % args}")
 
-    # ---------- Hilfsfunktionen ----------
+    # ---------- Helper functions ----------
     def _send(self, code: int, body: str, ctype: str = "text/plain; charset=utf-8"):
         data = body.encode("utf-8")
         self.send_response(code)
@@ -88,7 +88,7 @@ class OpenHabDummyHandler(BaseHTTPRequestHandler):
         cls.conversations.setdefault(conv_id, []).append(msg)
         return msg["id"]
 
-    # ---------- Routen ----------
+    # ---------- Routes ----------
     def do_POST(self):
         parsed = urlparse(self.path)
         path = parsed.path
@@ -101,7 +101,7 @@ class OpenHabDummyHandler(BaseHTTPRequestHandler):
             self._add_message(conv_id, "USER", text)
             answer = generate_answer(text)
             self._add_message(conv_id, "OPENHAB", answer)
-            # Klartext-Antwort (so erwartet es OpenHabClient für OPENHAB5_CHAT)
+            # Plain-text answer (as OpenHabClient expects it for OPENHAB5_CHAT)
             self._send(200, answer)
 
         elif path == "/rest/habot/chat":
@@ -111,11 +111,11 @@ class OpenHabDummyHandler(BaseHTTPRequestHandler):
         elif path == "/rest/voice/interpret":
             text = qs.get("text", [""])[0]
             print(f"[dummy] Voice-Interpreter-Befehl: {text!r}")
-            # Voice-Modus: keine verbale Antwort erwartet
+            # Voice mode: no verbal answer expected
             self._send(200, "")
 
         elif path == "/rest/chat":
-            # Custom-Modus: {"message": "..."} -> {"answer": "..."}
+            # Custom mode: {"message": "..."} -> {"answer": "..."}
             try:
                 payload = json.loads(body)
             except json.JSONDecodeError:
@@ -140,7 +140,7 @@ class OpenHabDummyHandler(BaseHTTPRequestHandler):
                 "lastModified": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             })
         elif path == "/rest":
-            # Info-Endpunkt, wie er von echtem openHAB bekannt ist
+            # Info endpoint as known from real openHAB
             self._send_json(200, {"version": "5.0.0-dummy", "locale": "de-DE"})
         elif path == "/":
             self._send(200, "openHAB-Dummy läuft. Endpoints:\n"

@@ -8,26 +8,26 @@ import org.robolectric.annotation.Implements
 import java.util.Locale
 
 /**
- * Robolectric-Shadow fuer [TextToSpeech].
+ * Robolectric shadow for [TextToSpeech].
  *
- * Der Standard-Shadow von Robolectric simuliert die Initialisierung ueber einen
- * Service-Bind, dessen Callback (mit Delay) auf dem Main-Looper landet - waehrend
- * der echte Konstruktor des Frameworks synchron auf das Service-Bind wartet.
- * Auf der JVM laeuft dieser Bind nie -> der TextToSpeech-Konstruktor blockiert
- * bis zum (langen) Timeout und der Smoke-Test dauert Minuten statt Millisekunden.
+ * Robolectric's default shadow simulates initialization via a service bind whose
+ * (delayed) callback is posted to the main looper - while the framework's real
+ * constructor waits synchronously for that bind.
+ * On the JVM this bind never happens -> the TextToSpeech constructor blocks
+ * until the (long) timeout and the smoke test takes minutes instead of milliseconds.
  *
- * Diese Shadow schliesst die Initialisierung stattdessen sofort ab:
- *  - Konstruktor ruft den OnInitListener synchron mit SUCCESS auf
- *  - speak/stop/shutdown/setLanguage sind harmlose No-Ops
+ * This shadow completes initialization immediately instead:
+ *  - the constructor calls the OnInitListener synchronously with SUCCESS
+ *  - speak/stop/shutdown/setLanguage are harmless no-ops
  *
- * Genutzt in de.openhabvoice.MainActivitySmokeTest via @Config(shadows = ...).
+ * Used in de.openhabvoice.MainActivitySmokeTest via @Config(shadows = ...).
  */
 @Implements(TextToSpeech::class)
 class FastTextToSpeechShadow {
 
     @Implementation
     fun __constructor__(context: Context?, listener: TextToSpeech.OnInitListener) {
-        // Initialisierung sofort "erfolgreich" melden - kein Service-Bind, kein Warten.
+        // Report initialization as "successful" immediately - no service bind, no waiting.
         listener.onInit(TextToSpeech.SUCCESS)
     }
 
@@ -46,6 +46,6 @@ class FastTextToSpeechShadow {
 
     @Implementation
     fun shutdown() {
-        // nichts zu tun
+        // nothing to do
     }
 }

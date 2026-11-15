@@ -13,7 +13,7 @@ import org.junit.Test
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * Unit-Tests fuer OpenHabClient mit MockWebServer – kein echter openHAB-Server noetig.
+ * Unit tests for OpenHabClient with MockWebServer - no real openHAB server needed.
  */
 class OpenHabClientTest {
 
@@ -50,7 +50,7 @@ class OpenHabClientTest {
         customPath = customPath,
     )
 
-    /** Dispatcher: 1. GET -> firstGet, weitere GETs -> laterGet, POST -> postBody (Standard: leer). */
+    /** Dispatcher: 1st GET -> firstGet, further GETs -> laterGet, POST -> postBody (default: empty). */
     private fun conversationDispatcher(firstGet: String, laterGet: String, postBody: String = "") =
         object : Dispatcher() {
             val getCalls = AtomicInteger()
@@ -66,7 +66,7 @@ class OpenHabClientTest {
     // ---------- openHAB 5 Chat ----------
 
     @Test
-    fun `openhab5 mit Klartext-Antwort liefert Antworttext`() = runTest {
+    fun `openhab5 with plain-text answer returns answer text`() = runTest {
         server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse =
                 if (request.method == "GET")
@@ -90,7 +90,7 @@ class OpenHabClientTest {
     }
 
     @Test
-    fun `openhab5 mit leerem Body holt neue Antwort aus dem Verlauf`() = runTest {
+    fun `openhab5 with empty body fetches new answer from the history`() = runTest {
         server.dispatcher = conversationDispatcher(
             firstGet = """{"messages":[{"id":1,"role":"OPENHAB","content":"alt"}]}""",
             laterGet = """{"messages":[{"id":1,"role":"OPENHAB","content":"alt"},{"id":2,"role":"OPENHAB","content":"neu"}]}""",
@@ -102,7 +102,7 @@ class OpenHabClientTest {
     }
 
     @Test
-    fun `openhab5 leere Antwort mit TOOL_RETURN nutzt Tool-Return`() = runTest {
+    fun `openhab5 empty answer with TOOL_RETURN uses tool return`() = runTest {
         server.dispatcher = conversationDispatcher(
             firstGet = """{"messages":[{"id":1,"role":"TOOL_RETURN","content":"erledigt"}]}""",
             laterGet = """{"messages":[{"id":1,"role":"TOOL_RETURN","content":"erledigt"},{"id":2,"role":"TOOL_RETURN","content":"okay"}]}""",
@@ -114,7 +114,7 @@ class OpenHabClientTest {
     }
 
     @Test
-    fun `openhab5 ohne neue Nachrichten liefert Fallback-Text`() = runTest {
+    fun `openhab5 without new messages returns fallback text`() = runTest {
         server.dispatcher = conversationDispatcher(
             firstGet = """{"messages":[]}""",
             laterGet = """{"messages":[]}""",
@@ -128,7 +128,7 @@ class OpenHabClientTest {
     // ---------- HABot ----------
 
     @Test
-    fun `habot extrahiert answer-Feld`() = runTest {
+    fun `habot extracts answer field`() = runTest {
         server.enqueue(MockResponse().setBody("""{"answer":"Alles aus"}"""))
         val client = OpenHabClient({ settings(ChatMode.HABOT) })
         assertEquals("Alles aus", client.send("Mach alles aus").getOrThrow())
@@ -138,21 +138,21 @@ class OpenHabClientTest {
     }
 
     @Test
-    fun `habot extrahiert text-Feld als Fallback`() = runTest {
+    fun `habot extracts text field as fallback`() = runTest {
         server.enqueue(MockResponse().setBody("""{"text":"Hallo"}"""))
         val client = OpenHabClient({ settings(ChatMode.HABOT) })
         assertEquals("Hallo", client.send("hi").getOrThrow())
     }
 
     @Test
-    fun `habot extrahiert message-Feld als Fallback`() = runTest {
+    fun `habot extracts message field as fallback`() = runTest {
         server.enqueue(MockResponse().setBody("""{"message":"Fertig"}"""))
         val client = OpenHabClient({ settings(ChatMode.HABOT) })
         assertEquals("Fertig", client.send("hi").getOrThrow())
     }
 
     @Test
-    fun `habot nicht-JSON-Body wird roh zurueckgegeben`() = runTest {
+    fun `habot non-JSON body is returned raw`() = runTest {
         server.enqueue(MockResponse().setBody("kein json"))
         val client = OpenHabClient({ settings(ChatMode.HABOT) })
         assertEquals("kein json", client.send("hi").getOrThrow())
@@ -161,7 +161,7 @@ class OpenHabClientTest {
     // ---------- Voice Interpreter ----------
 
     @Test
-    fun `voice mode URL-encodiert Befehl und liefert Fallback`() = runTest {
+    fun `voice mode URL-encodes command and returns fallback`() = runTest {
         server.enqueue(MockResponse().setBody(""))
         val client = OpenHabClient({ settings(ChatMode.VOICE) })
         assertEquals("✅ Command sent to openHAB.", client.send("Lampe Wohnzimmer an").getOrThrow())
@@ -173,7 +173,7 @@ class OpenHabClientTest {
     // ---------- Custom Endpoint ----------
 
     @Test
-    fun `custom mode postet JSON an customPath`() = runTest {
+    fun `custom mode posts JSON to customPath`() = runTest {
         server.enqueue(MockResponse().setBody("""{"message":"Fertig"}"""))
         val client = OpenHabClient({ settings(ChatMode.CUSTOM, customPath = "/rest/mybridge") })
         assertEquals("Fertig", client.send("Status").getOrThrow())
@@ -185,7 +185,7 @@ class OpenHabClientTest {
     // ---------- Auth ----------
 
     @Test
-    fun `Token setzt Bearer- und X-OpenHAB-Token-Header`() = runTest {
+    fun `token sets Bearer and X-OpenHAB-Token headers`() = runTest {
         server.enqueue(MockResponse().setBody("ok"))
         val client = OpenHabClient({ settings(ChatMode.HABOT, apiToken = "tok123") })
         client.send("hi")
@@ -195,7 +195,7 @@ class OpenHabClientTest {
     }
 
     @Test
-    fun `Basic-Auth setzt Authorization-Header`() = runTest {
+    fun `basic auth sets Authorization header`() = runTest {
         server.enqueue(MockResponse().setBody("ok"))
         val client = OpenHabClient({ settings(ChatMode.HABOT, username = "u", password = "p") })
         client.send("hi")
@@ -204,7 +204,7 @@ class OpenHabClientTest {
     }
 
     @Test
-    fun `Basic-Auth ueberschreibt Token-Authorization`() = runTest {
+    fun `basic auth overrides token authorization`() = runTest {
         server.enqueue(MockResponse().setBody("ok"))
         val client = OpenHabClient({
             settings(ChatMode.HABOT, apiToken = "tok123", username = "u", password = "p")
@@ -215,10 +215,10 @@ class OpenHabClientTest {
         assertEquals("Basic dTpw", req.getHeader("Authorization"))
     }
 
-    // ---------- Fehlerfälle ----------
+    // ---------- Error cases ----------
 
     @Test
-    fun `fehlende Server-URL schlaegt mit Hinweis fehl`() = runTest {
+    fun `missing server URL fails with hint`() = runTest {
         val client = OpenHabClient({ settings(ChatMode.HABOT, serverUrl = "") })
         val result = client.send("hi")
         assertTrue(result.isFailure)
@@ -227,8 +227,8 @@ class OpenHabClientTest {
     }
 
     @Test
-    fun `404 im openhab5-Modus liefert LLM-Hinweis`() = runTest {
-        // 2x 404: das erste GET (Conversation) und der POST brauchen je eine Antwort
+    fun `404 in openhab5 mode returns LLM hint`() = runTest {
+        // 2x 404: the first GET (conversation) and the POST each need a response
         server.enqueue(MockResponse().setResponseCode(404))
         server.enqueue(MockResponse().setResponseCode(404))
         val client = OpenHabClient({ settings(ChatMode.OPENHAB5_CHAT, conversationId = "abc") })
@@ -238,7 +238,7 @@ class OpenHabClientTest {
     }
 
     @Test
-    fun `401 liefert Authentifizierungs-Hinweis`() = runTest {
+    fun `401 returns authentication hint`() = runTest {
         server.enqueue(MockResponse().setResponseCode(401))
         val client = OpenHabClient({ settings(ChatMode.HABOT) })
         val msg = client.send("hi").exceptionOrNull()!!.message!!
@@ -249,7 +249,7 @@ class OpenHabClientTest {
     // ---------- deleteConversation ----------
 
     @Test
-    fun `deleteConversation loescht im openhab5-Modus per DELETE`() = runTest {
+    fun `deleteConversation deletes in openhab5 mode via DELETE`() = runTest {
         server.enqueue(MockResponse().setResponseCode(200))
         val client = OpenHabClient({ settings(ChatMode.OPENHAB5_CHAT, conversationId = "abc") })
         client.deleteConversation()
@@ -259,7 +259,7 @@ class OpenHabClientTest {
     }
 
     @Test
-    fun `deleteConversation wird in anderen Modi ignoriert`() = runTest {
+    fun `deleteConversation is ignored in other modes`() = runTest {
         val client = OpenHabClient({ settings(ChatMode.HABOT, conversationId = "abc") })
         client.deleteConversation()
         assertEquals(0, server.requestCount)

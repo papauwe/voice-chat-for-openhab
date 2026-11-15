@@ -7,9 +7,9 @@ import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 
 /**
- * Rendert Markdown (GFM: fett, kursiv, Listen, Tabellen, Code) mit
- * dem mikepenz multiplatform-markdown-renderer in Material-3-Optik.
- * Farben werden an die Bubble-Farben angepasst.
+ * Renders Markdown (GFM: bold, italic, lists, tables, code) using the
+ * mikepenz multiplatform-markdown-renderer with Material 3 styling.
+ * Colors are adapted to the bubble colors.
  */
 @Composable
 fun MarkdownMessage(text: String, contentColor: Color, modifier: Modifier = Modifier) {

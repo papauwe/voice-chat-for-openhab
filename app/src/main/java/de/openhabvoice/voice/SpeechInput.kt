@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Abstraktion der Spracherkennung (testbar, ohne Android-Recognizer).
+ * Abstraction of speech recognition (testable without the Android recognizer).
  */
 interface SpeechEngine {
     val isListening: StateFlow<Boolean>
@@ -24,13 +24,13 @@ interface SpeechEngine {
 }
 
 /**
- * Wrapper um Androids SpeechRecognizer (Press-to-Talk).
+ * Wrapper around Android's SpeechRecognizer (press-to-talk).
  *
- * Ablauf:
- *  - start() beginnt die Erkennung (de-DE o. konfigurierbar)
- *  - Teilergebnisse landen in [partial]
- *  - beim finalen Ergebnis wird [onResult] aufgerufen und die Erkennung beendet
- *  - Fehler landen in [error]
+ * Flow:
+ *  - start() begins recognition (de-DE or configurable)
+ *  - partial results land in [partial]
+ *  - on the final result [onResult] is called and recognition ends
+ *  - errors land in [error]
  */
 class SpeechInput(private val context: Context) : SpeechEngine {
 

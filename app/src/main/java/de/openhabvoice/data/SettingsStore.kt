@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Abstraktion der Einstellungen (testbar, ohne Android-Context).
+ * Abstraction of the settings (testable without an Android context).
  */
 interface SettingsStore {
     val settings: StateFlow<AppSettings>
@@ -14,8 +14,8 @@ interface SettingsStore {
 }
 
 /**
- * Sehr einfache, synchron gespeicherte Einstellungen (SharedPreferences).
- * Für die Minimalversion vollkommen ausreichend.
+ * Very simple, synchronously stored settings (SharedPreferences).
+ * Fully sufficient for the minimal version.
  */
 class PrefsSettingsStore(context: Context) : SettingsStore {
 

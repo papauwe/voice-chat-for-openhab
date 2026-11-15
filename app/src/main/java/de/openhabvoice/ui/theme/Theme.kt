@@ -7,7 +7,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-// openHAB-typisches Orange als Akzentfarbe
+// openHAB-style orange as accent color
 private val Orange = Color(0xFFF97316)
 private val OrangeContainer = Color(0xFFFFD9C2)
 private val OnOrange = Color(0xFF3A1B00)

@@ -4,17 +4,17 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**
- * Unit-Tests fuer stripMarkdown: Markdown wird zu TTS-freundlichem Klartext.
+ * Unit tests for stripMarkdown: Markdown is converted to TTS-friendly plain text.
  */
 class TextUtilTest {
 
     @Test
-    fun `Klartext bleibt unveraendert`() {
+    fun `plain text stays unchanged`() {
         assertEquals("Hallo Welt", stripMarkdown("Hallo Welt"))
     }
 
     @Test
-    fun `Tabelle wird zu Kommazeilen und Trennzeile entfernt`() {
+    fun `table becomes comma rows and separator row is removed`() {
         val input = """
             | Name | Zustand |
             |------|---------|
@@ -24,42 +24,42 @@ class TextUtilTest {
     }
 
     @Test
-    fun `Codeblock wird zu Inhalt ohne Backticks`() {
+    fun `code block becomes content without backticks`() {
         assertEquals("val x = 1", stripMarkdown("```kotlin\nval x = 1\n```"))
         assertEquals("val x = 1", stripMarkdown("```\nval x = 1\n```"))
     }
 
     @Test
-    fun `Inline-Code Backticks werden entfernt`() {
+    fun `inline code backticks are removed`() {
         assertEquals("Der Wert ist 42 Grad", stripMarkdown("Der Wert ist `42` Grad"))
     }
 
     @Test
-    fun `Link wird zu Linktext`() {
+    fun `link becomes link text`() {
         assertEquals("openHAB ist gut", stripMarkdown("[openHAB](https://openhab.org) ist gut"))
     }
 
     @Test
-    fun `Ueberschriften-Marker werden entfernt`() {
+    fun `heading markers are removed`() {
         assertEquals("Temperatur", stripMarkdown("## Temperatur"))
         assertEquals("Alles", stripMarkdown("### Alles"))
     }
 
     @Test
-    fun `Bullet-Marker werden entfernt`() {
+    fun `bullet markers are removed`() {
         assertEquals("Licht an\nRadio aus", stripMarkdown("- Licht an\n* Radio aus"))
     }
 
     @Test
-    fun `Fett und Kursiv werden entfernt`() {
+    fun `bold and italic are removed`() {
         assertEquals("ist wichtig", stripMarkdown("ist **wichtig**"))
         assertEquals("ist wichtig", stripMarkdown("ist __wichtig__"))
     }
 
     @Test
-    fun `fett markierte Zahl bleibt vollstaendig erhalten - Grenzfall aus openHAB`() {
-        // Regression: openHAB-Antwort "Heute wurden **0,6 kWh** erzeugt" – die Zahl
-        // wurde von der TTS nicht vorgelesen, wenn das Markup ueberlebt.
+    fun `bold marked number stays fully intact - edge case from openHAB`() {
+        // Regression: openHAB answer "Heute wurden **0,6 kWh** erzeugt" - the number
+        // was not read aloud by TTS when the markup survived.
         assertEquals("Heute wurden 0,6 kWh erzeugt", stripMarkdown("Heute wurden **0,6 kWh** erzeugt"))
         assertEquals("0,6 kWh", stripMarkdown("**0,6 kWh**"))
         assertEquals("Heute wurden 0,6 kWh erzeugt", stripMarkdown("Heute wurden *0,6 kWh* erzeugt"))
@@ -68,14 +68,14 @@ class TextUtilTest {
     }
 
     @Test
-    fun `Original-Antwort vom echten openHAB (Balkonkraftwerk) wird ohne Markup gestrippt`() {
-        // Exakter Rohstring aus /rest/voice/conversations/<id> des echten Servers:
+    fun `original answer from real openHAB (balcony solar plant) is stripped without markup`() {
+        // Exact raw string from /rest/voice/conversations/<id> of the real server:
         // "Heute wurden mit dem Balkonkraftwerk **0,631 kWh** Strom erzeugt."
         assertEquals(
             "Heute wurden mit dem Balkonkraftwerk 0,631 kWh Strom erzeugt.",
             stripMarkdown("Heute wurden mit dem Balkonkraftwerk **0,631 kWh** Strom erzeugt.")
         )
-        // gleiche Antwort mit Emoji am Ende (in der App hängt der TTS-Sprachtext hinterher)
+        // same answer with an emoji at the end (in the app the TTS utterance lags behind)
         assertEquals(
             "Heute wurden mit dem Balkonkraftwerk 0,631 kWh Strom erzeugt.",
             stripMarkdown("Heute wurden mit dem Balkonkraftwerk **0,631 kWh** Strom erzeugt. ⚡")
@@ -83,7 +83,7 @@ class TextUtilTest {
     }
 
     @Test
-    fun `fett markierte Zahl am Zeilenanfang und in Liste bleibt erhalten`() {
+    fun `bold number at line start and in list stays intact`() {
         assertEquals("0,6 kWh wurden erzeugt", stripMarkdown("**0,6 kWh** wurden erzeugt"))
         assertEquals(
             "Heute: 0,6 kWh\nGestern: 1,2 kWh",
@@ -92,7 +92,7 @@ class TextUtilTest {
     }
 
     @Test
-    fun `fett markierte Zahl in Tabelle bleibt erhalten`() {
+    fun `bold number in table stays intact`() {
         val input = """
             | Zeitraum | Erzeugung |
             |----------|-----------|
@@ -102,23 +102,23 @@ class TextUtilTest {
     }
 
     @Test
-    fun `Kursiv mit Wortgrenze wird entfernt`() {
+    fun `italic with word boundary is removed`() {
         assertEquals("leise wichtig", stripMarkdown("*leise* _wichtig_"))
     }
 
     @Test
-    fun `Emoji und Symbole werden entfernt`() {
+    fun `emojis and symbols are removed`() {
         assertEquals("Licht an", stripMarkdown("Licht an ✅💡"))
         assertEquals("Morgen", stripMarkdown("☀️Morgen"))
     }
 
     @Test
-    fun `Mehrfache Leerzeilen werden zusammengefasst`() {
+    fun `multiple blank lines are collapsed`() {
         assertEquals("a\n\nb", stripMarkdown("a\n\n\n\nb"))
     }
 
     @Test
-    fun `gemischter Chat-Text wird aufgeraeumt`() {
+    fun `mixed chat text is cleaned up`() {
         val input = """
             ## Status
             - WZ-Lampe: **an**

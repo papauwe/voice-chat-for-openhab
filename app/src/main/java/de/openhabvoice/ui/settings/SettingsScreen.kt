@@ -71,8 +71,8 @@ fun SettingsScreen(
             )
         },
         bottomBar = {
-            // Sticky Footer: Save-Button bleibt immer sichtbar (auch beim Scrollen)
-            // und weicht Tastatur (imePadding) sowie Gestenleiste (navigationBarsPadding) aus.
+            // Sticky footer: the save button stays visible at all times (even while scrolling)
+            // and avoids the keyboard (imePadding) as well as the gesture bar (navigationBarsPadding).
             Surface(
                 color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 3.dp,
@@ -246,7 +246,7 @@ private fun SectionTitle(text: String) {
     )
 }
 
-/** Anzeigetexte der Chat-Modi als String-Ressourcen (lokalisiert statt im Enum). */
+/** Display texts of the chat modes as string resources (localized instead of in the enum). */
 private val ChatMode.labelRes: Int
     get() = when (this) {
         ChatMode.OPENHAB5_CHAT -> R.string.mode_openhab5_label

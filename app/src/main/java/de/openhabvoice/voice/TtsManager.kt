@@ -5,7 +5,7 @@ import android.speech.tts.TextToSpeech
 import java.util.Locale
 
 /**
- * Abstraktion der Sprachausgabe (testbar, ohne Android-TTS).
+ * Abstraction of text-to-speech (testable without Android TTS).
  */
 interface TtsEngine {
     fun speak(text: String, languageTag: String)
@@ -14,7 +14,7 @@ interface TtsEngine {
 }
 
 /**
- * Android-TTS mit deutschen Standard-Einstellungen.
+ * Android TTS with German default settings.
  */
 class TtsManager(context: Context) : TextToSpeech.OnInitListener, TtsEngine {
 

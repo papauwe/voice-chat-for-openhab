@@ -25,7 +25,7 @@ import org.junit.Test
 import java.io.IOException
 
 /**
- * Unit-Tests fuer ChatViewModel mit Fakes (ohne Robolectric, ohne Android-Dienste).
+ * Unit tests for ChatViewModel with fakes (no Robolectric, no Android services).
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ChatViewModelTest {
@@ -58,12 +58,12 @@ class ChatViewModelTest {
     // ---------- Initialisierung ----------
 
     @Test
-    fun `init erzeugt Conversation-ID wenn leer`() {
+    fun `init creates conversation ID when empty`() {
         assertTrue(store.settings.value.conversationId.isNotBlank())
     }
 
     @Test
-    fun `init behaelt vorhandene Conversation-ID`() {
+    fun `init keeps existing conversation ID`() {
         val store2 = FakeSettingsStore(AppSettings(conversationId = "fixed"))
         val vm2 = ChatViewModel(Application(), store2, client, tts, speech, DefaultChatStrings)
         assertEquals("fixed", vm2.settings.value.conversationId)
@@ -72,7 +72,7 @@ class ChatViewModelTest {
     // ---------- sendText ----------
 
     @Test
-    fun `leere Eingabe wird ignoriert`() = runTest {
+    fun `empty input is ignored`() = runTest {
         vm.sendText("   ")
         advanceUntilIdle()
         assertEquals(1, vm.messages.value.size)
@@ -80,7 +80,7 @@ class ChatViewModelTest {
     }
 
     @Test
-    fun `erfolgreiche Antwort haengt USER- und ASSISTANT-Nachricht an und sendet TTS`() = runTest {
+    fun `successful answer appends USER and ASSISTANT messages and sends TTS`() = runTest {
         client.result = Result.success("Antwort")
         vm.sendText("Frage")
         advanceUntilIdle()
@@ -93,7 +93,7 @@ class ChatViewModelTest {
     }
 
     @Test
-    fun `Markdown in Antwort wird fuer TTS entfernt`() = runTest {
+    fun `markdown in answer is stripped for TTS`() = runTest {
         client.result = Result.success("## Titel\n**wichtig** ✅")
         vm.sendText("Frage")
         advanceUntilIdle()
@@ -101,7 +101,7 @@ class ChatViewModelTest {
     }
 
     @Test
-    fun `TTS ausgeschaltet - nichts gesprochen`() = runTest {
+    fun `TTS disabled - nothing spoken`() = runTest {
         store.save(store.settings.value.copy(ttsEnabled = false))
         client.result = Result.success("Antwort")
         vm.sendText("Frage")
@@ -110,7 +110,7 @@ class ChatViewModelTest {
     }
 
     @Test
-    fun `Fehler erzeugt SYSTEM-Nachricht ohne TTS`() = runTest {
+    fun `error creates SYSTEM message without TTS`() = runTest {
         client.result = Result.failure(IOException("404 - Kein LLM-Interpreter"))
         vm.sendText("Frage")
         advanceUntilIdle()
@@ -122,7 +122,7 @@ class ChatViewModelTest {
     }
 
     @Test
-    fun `doppeltes senden waehrend laufendem Request wird ignoriert`() = runTest {
+    fun `duplicate send while request is running is ignored`() = runTest {
         vm.sendText("erste")
         vm.sendText("zweite")
         advanceUntilIdle()
@@ -133,7 +133,7 @@ class ChatViewModelTest {
     // ---------- clearChat ----------
 
     @Test
-    fun `clearChat leert Verlauf und setzt neue Conversation-ID`() = runTest {
+    fun `clearChat clears history and sets new conversation ID`() = runTest {
         val oldId = store.settings.value.conversationId
         vm.sendText("Frage")
         advanceUntilIdle()
@@ -147,7 +147,7 @@ class ChatViewModelTest {
     // ---------- saveSettings ----------
 
     @Test
-    fun `saveSettings behaelt Conversation-ID bei leerer neuer ID`() {
+    fun `saveSettings keeps conversation ID when new ID is empty`() {
         val id = store.settings.value.conversationId
         vm.saveSettings(AppSettings(serverUrl = "http://x:8080"))
         assertEquals("http://x:8080", store.settings.value.serverUrl)
@@ -157,21 +157,21 @@ class ChatViewModelTest {
     // ---------- onMicClick ----------
 
     @Test
-    fun `onMicClick startet Spracherkennung mit Spracheinstellung und stoppt TTS`() {
+    fun `onMicClick starts speech recognition with language setting and stops TTS`() {
         vm.onMicClick()
         assertEquals("de-DE", speech.startLanguage)
         assertTrue(tts.stopped)
     }
 
     @Test
-    fun `onMicClick stoppt laufende Erkennung`() {
+    fun `onMicClick stops running recognition`() {
         speech.isListening.value = true
         vm.onMicClick()
         assertTrue(speech.stopCount > 0)
     }
 
     @Test
-    fun `Spracherkennungsergebnis loest sendText aus`() = runTest {
+    fun `speech recognition result triggers sendText`() = runTest {
         vm.onMicClick()
         speech.onResultCallback!!.invoke("Sprachbefehl")
         advanceUntilIdle()
