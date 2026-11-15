@@ -1,0 +1,6 @@
+Initial release:
+- Chat with the openHAB 5 assistant, HABot, voice interpreter or a custom endpoint
+- Voice input (press-to-talk) and text-to-speech answers
+- openHAB API token or Basic Auth, conversation reset
+- Home-screen microphone widget
+- English and German UI

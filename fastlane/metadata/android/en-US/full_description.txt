@@ -1,0 +1,27 @@
+Voice Chat for openHAB is an unofficial, open-source voice and chat client for openHAB 5.
+
+Speak or type a question and your openHAB server answers - as text with Markdown rendering and read aloud with text-to-speech.
+
+Chat modes:
+- openHAB 5 Chat: the new Main-UI assistant (/rest/voice/interpreters) with server-side conversation history per conversation ID, including clearing it
+- HABot: POST /rest/habot/chat
+- Voice Interpreter: executes commands via /rest/voice/interpret
+- Custom endpoint: POST {"message": ...} to any path; the answer is read from answer/text/message/response/result
+
+Features:
+- Press-to-talk speech input with live partial results
+- Text-to-speech answers, toggleable in the top bar
+- openHAB API token or Basic Auth
+- 1x1 home-screen widget: tap to start speech recognition immediately
+- English and German user interface
+- Small APK (~1.7 MB), no trackers, no analytics; only microphone and network permissions
+
+Requirements:
+- openHAB 5.x server with HABot and/or an LLM-based human language interpreter (e.g. the ChatGPT binding)
+- Android 8.0 or newer
+- Speech recognition uses the Android SpeechRecognizer service (provided by Google on most devices, requires internet)
+
+Voice Chat for openHAB is an independent community project, not affiliated with or endorsed by the openHAB Foundation. openHAB is a trademark of the openHAB Foundation e.V.
+
+License: Eclipse Public License 2.0 (EPL-2.0).
+Source code: https://github.com/papauwe/voice-chat-for-openhab

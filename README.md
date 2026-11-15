@@ -7,6 +7,12 @@ Human Language Interpreter such as the ChatGPT binding) answers – as text and 
 > This is an independent community project and is **not** affiliated with or endorsed
 > by the openHAB Foundation e.V. "openHAB" is a trademark of the openHAB Foundation.
 
+## Screenshots
+
+| Chat | Answer | Settings |
+| --- | --- | --- |
+| ![Chat](docs/screenshots/screen_inital.png) | ![Answer](docs/screenshots/screen_temperature.png) | ![Settings](docs/screenshots/screen_settings.png) |
+
 ## Features
 
 - **Voice input** via the Android SpeechRecognizer (press-to-talk, partial results shown live)
