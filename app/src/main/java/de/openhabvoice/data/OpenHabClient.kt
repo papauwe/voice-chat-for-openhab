@@ -2,6 +2,7 @@ package de.openhabvoice.data
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.ConnectionPool
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -35,9 +36,14 @@ class OpenHabClient(
 ) : OpenHabApi {
 
     private val texts = textsOverride ?: DefaultOpenHabTexts
+    // openHAB's Jetty closes idle keep-alive connections after ~30 s (default idleTimeout).
+    // OkHttp's default pool keeps them for 5 minutes -> reusing such a connection throws
+    // "unexpected end of stream". Keep the pool idle timeout BELOW the server's idle
+    // timeout so OkHttp discards connections before the server closes them.
     private val client = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(120, TimeUnit.SECONDS)
+        .connectionPool(ConnectionPool(5, 20, TimeUnit.SECONDS))
         // Important: no silent retry for POST messages - otherwise the same
         // message could end up twice in the history on a dropped connection
         // (-> tools being executed twice on the server).
