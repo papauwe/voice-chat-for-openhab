@@ -1,7 +1,11 @@
 package de.openhabvoice.ui.chat
 
 import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.RepeatMode
@@ -9,18 +13,23 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -68,7 +77,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ChatScreen(
     viewModel: ChatViewModel,
@@ -146,12 +155,15 @@ fun ChatScreen(
             )
         }
     ) { padding ->
+        // IMPORTANT: no extra imePadding() here - the bottomBar (ChatInputBar)
+        // already carries the safeDrawing bottom inset (max(nav bar, keyboard)).
+        // Scaffold forwards its height via `padding`; a second imePadding
+        // would shrink the list twice.
         LazyColumn(
             state = listState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .imePadding(),
+                .padding(padding),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
@@ -210,6 +222,7 @@ private fun Bubble(
     markdown: Boolean = false,
     maxWidth: Dp = 300.dp
 ) {
+    val context = LocalContext.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (alignEnd) Arrangement.End else Arrangement.Start
@@ -222,7 +235,24 @@ private fun Bubble(
                 bottomEnd = if (alignEnd) 4.dp else 18.dp
             ),
             color = container,
-            modifier = Modifier.widthIn(max = maxWidth)
+            // Long-press copies the raw text of the message to the clipboard
+            // (also works with Markdown rendering, where text selection
+            //  via the renderer is not reliable).
+            modifier = Modifier
+                .widthIn(max = maxWidth)
+                .combinedClickable(
+                    onClick = {},
+                    onLongClick = {
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE)
+                            as ClipboardManager
+                        clipboard.setPrimaryClip(ClipData.newPlainText("openHAB chat", text))
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.msg_copied),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                )
         ) {
             Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
                 if (markdown) {
@@ -285,11 +315,13 @@ private fun ChatInputBar(
     Surface(
         color = MaterialTheme.colorScheme.surface,
         tonalElevation = 3.dp,
-        // Freien Platz unterhalb der Gestenleiste lassen, damit der untere
-        // Rahmen des Eingabefelds nicht hinter dem System-Drawer verschwindet.
+        // Keyboard handling (edge-to-edge): safeDrawing bottom = max(nav bar, IME).
+        // With the keyboard open the input bar lifts above the keyboard without
+        // double-counting the nav bar and IME insets
+        // (which would happen with navigationBarsPadding() + imePadding()).
         modifier = Modifier
             .fillMaxWidth()
-            .navigationBarsPadding()
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
             .padding(bottom = 6.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -363,10 +395,10 @@ private fun ChatInputBar(
 
 @Composable
 private fun MicButton(isListening: Boolean, enabled: Boolean, onClick: () -> Unit) {
-    // Puls-Animation nur erzeugen, wenn tatsaechlich gehoert wird: Die unendliche
-    // Transition haelt sonst dauerhaft den Compose-FrameClock-Loop am Laufen und
-    // Robolectric-Tests (ShadowPausedLooper.idle) kommen nie in den Idle-Zustand.
-    // Auch produktiv korrekt: Der Puls ist nur beim aktiven Zuhören sichtbar.
+    // Only create the pulse animation while actually listening: otherwise the infinite
+    // transition keeps the Compose FrameClock loop running forever and
+    // Robolectric tests (ShadowPausedLooper.idle) never reach the idle state.
+    // Also correct in production: the pulse is only visible while actively listening.
     if (isListening) {
         val transition = rememberInfiniteTransition(label = "micPulse")
         val scale by transition.animateFloat(

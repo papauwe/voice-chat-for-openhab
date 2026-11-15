@@ -11,6 +11,7 @@
     <string name="placeholder_listening">Ich höre zu …</string>
     <string name="placeholder_waiting">Warte auf openHAB …</string>
     <string name="placeholder_input">Nachricht an openHAB …</string>
+    <string name="msg_copied">In die Zwischenablage kopiert</string>
 
     <!-- Content descriptions -->
     <string name="cd_tts_on">Sprachausgabe an</string>

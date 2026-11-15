@@ -77,4 +77,7 @@ dependencies {
     // Robolectric fuer Android-abhaengige Klassen (SharedPreferences)
     testImplementation("androidx.test:core:1.6.1")
     testImplementation("org.robolectric:robolectric:4.14.1")
+    // Compose-UI-Tests unter Robolectric (createComposeRule, Touch-Injection)
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
