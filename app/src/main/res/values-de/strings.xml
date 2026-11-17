@@ -62,6 +62,10 @@
     <string name="speech_error_timeout">Timeout der Spracherkennung.</string>
     <string name="speech_error_busy">Spracherkennung ist beschäftigt.</string>
     <string name="speech_error_server">Fehler im Spracherkennungs-Dienst.</string>
+    <string name="speech_error_too_many_requests">Zu viele Erkennungsanfragen – bitte gleich nochmal versuchen.</string>
+    <string name="speech_error_server_disconnected">Die Spracherkennung wurde unterbrochen – bitte erneut versuchen.</string>
+    <string name="speech_error_language_not_supported">Die Erkennungssprache wird vom Sprachdienst nicht unterstützt.</string>
+    <string name="speech_error_language_unavailable">Die Erkennungssprache ist momentan nicht verfügbar (Sprachmodell nicht geladen?).</string>
     <string name="speech_error_unknown">Unbekannter Fehler (%1$d).</string>
     <string name="speech_no_match">Nichts verstanden – bitte nochmal sprechen.</string>
 

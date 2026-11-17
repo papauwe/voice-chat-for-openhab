@@ -3,9 +3,12 @@ package de.openhabvoice.voice
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.util.Log
 import de.openhabvoice.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,7 +33,9 @@ interface SpeechEngine {
  *  - start() begins recognition (de-DE or configurable)
  *  - partial results land in [partial]
  *  - on the final result [onResult] is called and recognition ends
- *  - errors land in [error]
+ *  - errors land in [error]; transient service errors are retried once
+ *    automatically (e.g. the service often disconnects right after a cold
+ *    start triggered by the home screen widget)
  */
 class SpeechInput(private val context: Context) : SpeechEngine {
 
@@ -46,6 +51,12 @@ class SpeechInput(private val context: Context) : SpeechEngine {
     private var recognizer: SpeechRecognizer? = null
     private var onResult: ((String) -> Unit)? = null
 
+    // Kept across an automatic retry so the failed recognition can be restarted.
+    private var language = ""
+    private var retryCount = 0
+
+    private val mainHandler = Handler(Looper.getMainLooper())
+
     override fun start(language: String, onResult: (String) -> Unit) {
         release()
         _error.value = null
@@ -57,6 +68,16 @@ class SpeechInput(private val context: Context) : SpeechEngine {
         }
 
         this.onResult = onResult
+        this.language = language
+        retryCount = 0
+        startListening()
+    }
+
+    /**
+     * Creates the recognizer and starts listening. Called from [start] and for
+     * automatic retries of transient service errors.
+     */
+    private fun startListening() {
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, language)
@@ -73,10 +94,14 @@ class SpeechInput(private val context: Context) : SpeechEngine {
     }
 
     override fun stop() {
+        // Also cancel a pending retry: the user explicitly wants to stop.
+        mainHandler.removeCallbacksAndMessages(null)
         recognizer?.stopListening()
     }
 
     override fun release() {
+        // Cancel a pending retry so it cannot restart a released recognizer.
+        mainHandler.removeCallbacksAndMessages(null)
         recognizer?.destroy()
         recognizer = null
         _isListening.value = false
@@ -92,7 +117,17 @@ class SpeechInput(private val context: Context) : SpeechEngine {
 
         override fun onError(error: Int) {
             _isListening.value = false
+            Log.w(TAG, "SpeechRecognizer onError($error)")
             if (error != SpeechRecognizer.ERROR_NO_MATCH && error != SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
+                // Transient service errors (busy / rate limited / disconnected):
+                // destroy the broken recognizer and retry once after a short delay.
+                if (error in RETRYABLE_ERRORS && retryCount < MAX_RETRIES) {
+                    retryCount++
+                    recognizer?.destroy()
+                    recognizer = null
+                    mainHandler.postDelayed({ startListening() }, RETRY_DELAY_MS)
+                    return
+                }
                 _error.value = when (error) {
                     SpeechRecognizer.ERROR_AUDIO -> context.getString(R.string.speech_error_audio)
                     SpeechRecognizer.ERROR_CLIENT -> context.getString(R.string.speech_error_client)
@@ -101,6 +136,10 @@ class SpeechInput(private val context: Context) : SpeechEngine {
                     SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> context.getString(R.string.speech_error_timeout)
                     SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> context.getString(R.string.speech_error_busy)
                     SpeechRecognizer.ERROR_SERVER -> context.getString(R.string.speech_error_server)
+                    SpeechRecognizer.ERROR_TOO_MANY_REQUESTS -> context.getString(R.string.speech_error_too_many_requests)
+                    SpeechRecognizer.ERROR_SERVER_DISCONNECTED -> context.getString(R.string.speech_error_server_disconnected)
+                    SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED -> context.getString(R.string.speech_error_language_not_supported)
+                    SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE -> context.getString(R.string.speech_error_language_unavailable)
                     else -> context.getString(R.string.speech_error_unknown, error)
                 }
             } else {
@@ -127,5 +166,17 @@ class SpeechInput(private val context: Context) : SpeechEngine {
         }
 
         override fun onEvent(eventType: Int, params: Bundle?) {}
+    }
+
+    companion object {
+        /** Transient errors where one automatic retry usually succeeds. */
+        private val RETRYABLE_ERRORS = setOf(
+            SpeechRecognizer.ERROR_RECOGNIZER_BUSY,
+            SpeechRecognizer.ERROR_TOO_MANY_REQUESTS,
+            SpeechRecognizer.ERROR_SERVER_DISCONNECTED
+        )
+        private const val MAX_RETRIES = 1
+        private const val RETRY_DELAY_MS = 500L
+        private const val TAG = "SpeechInput"
     }
 }

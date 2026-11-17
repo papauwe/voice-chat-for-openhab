@@ -62,6 +62,10 @@
     <string name="speech_error_timeout">Speech recognition timed out.</string>
     <string name="speech_error_busy">Speech recognition is busy.</string>
     <string name="speech_error_server">Error in the speech recognition service.</string>
+    <string name="speech_error_too_many_requests">Too many recognition requests – please try again in a moment.</string>
+    <string name="speech_error_server_disconnected">The speech recognition service was disconnected – please try again.</string>
+    <string name="speech_error_language_not_supported">The recognition language is not supported by the speech service.</string>
+    <string name="speech_error_language_unavailable">The recognition language is currently unavailable (language model not downloaded?).</string>
     <string name="speech_error_unknown">Unknown error (%1$d).</string>
     <string name="speech_no_match">Nothing understood – please speak again.</string>
 
