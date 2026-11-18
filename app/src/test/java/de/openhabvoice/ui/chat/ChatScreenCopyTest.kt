@@ -63,6 +63,7 @@ class ChatScreenCopyTest {
         override val isListening: StateFlow<Boolean> = _listening.asStateFlow()
         override val partial: StateFlow<String> = _partial.asStateFlow()
         override val error: StateFlow<String?> = _error.asStateFlow()
+        override val status: StateFlow<String?> = MutableStateFlow<String?>(null).asStateFlow()
         override fun start(language: String, onResult: (String) -> Unit) {}
         override fun stop() {}
         override fun release() {}

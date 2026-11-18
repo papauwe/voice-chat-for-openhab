@@ -88,6 +88,7 @@ fun ChatScreen(
     val partialText by viewModel.partialText.collectAsStateWithLifecycle()
     val isSending by viewModel.isSending.collectAsStateWithLifecycle()
     val speechError by viewModel.speechError.collectAsStateWithLifecycle()
+    val speechStatus by viewModel.speechStatus.collectAsStateWithLifecycle()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val ttsEnabled = settings.ttsEnabled
 
@@ -145,6 +146,7 @@ fun ChatScreen(
                 partialText = partialText,
                 isSending = isSending,
                 speechError = speechError,
+                speechStatus = speechStatus,
                 onMicClick = {
                     val granted = ContextCompat.checkSelfPermission(
                         context, Manifest.permission.RECORD_AUDIO
@@ -308,6 +310,7 @@ private fun ChatInputBar(
     partialText: String,
     isSending: Boolean,
     speechError: String?,
+    speechStatus: String?,
     onMicClick: () -> Unit
 ) {
     var input by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
@@ -325,6 +328,17 @@ private fun ChatInputBar(
             .padding(bottom = 6.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
+            if (speechStatus != null) {
+                // Non-blocking status (e.g. offline model download progress)
+                Text(
+                    text = speechStatus,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                )
+            }
             if (speechError != null) {
                 Text(
                     text = speechError,

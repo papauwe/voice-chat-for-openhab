@@ -10,11 +10,15 @@ import de.openhabvoice.data.OpenHabClient
 import de.openhabvoice.data.PrefsSettingsStore
 import de.openhabvoice.data.ResourceOpenHabTexts
 import de.openhabvoice.data.SettingsStore
+import android.speech.SpeechRecognizer
 import de.openhabvoice.data.stripMarkdown
 import de.openhabvoice.voice.SpeechEngine
 import de.openhabvoice.voice.SpeechInput
+import de.openhabvoice.voice.SpeechRouter
 import de.openhabvoice.voice.TtsEngine
 import de.openhabvoice.voice.TtsManager
+import de.openhabvoice.voice.VoskModelStore
+import de.openhabvoice.voice.VoskSpeechInput
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,7 +44,16 @@ class ChatViewModel(
     private val clientImpl =
         clientOverride ?: OpenHabClient({ settingsStore.settings.value }, ResourceOpenHabTexts(app))
     private val ttsImpl = ttsOverride ?: TtsManager(app)
-    private val speechImpl = speechOverride ?: SpeechInput(app)
+    // Router: system speech service if available, otherwise offline Vosk
+    // (FireOS devices ship without a speech service). The setting
+    // SttEngine forces one of the two engines.
+    private val speechImpl = speechOverride ?: SpeechRouter(
+        systemEngine = SpeechInput(app),
+        offlineEngine = VoskSpeechInput(app, VoskModelStore(app)),
+        preference = { settingsStore.settings.value.sttEngine },
+        systemAvailable = { SpeechRecognizer.isRecognitionAvailable(app) },
+        scope = viewModelScope,
+    )
     private val strings = chatStringsOverride ?: ResourceChatStrings(app)
 
     val settings: StateFlow<AppSettings> = settingsStore.settings
@@ -48,6 +61,8 @@ class ChatViewModel(
     val isListening: StateFlow<Boolean> = speechImpl.isListening
     val partialText: StateFlow<String> = speechImpl.partial
     val speechError: StateFlow<String?> = speechImpl.error
+    /** Non-blocking status of the speech engine (e.g. model download progress). */
+    val speechStatus: StateFlow<String?> = speechImpl.status
 
     private val _isSending = MutableStateFlow(false)
     val isSending: StateFlow<Boolean> = _isSending.asStateFlow()

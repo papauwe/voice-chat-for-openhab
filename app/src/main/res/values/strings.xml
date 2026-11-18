@@ -55,6 +55,7 @@
 
     <!-- Speech recognition -->
     <string name="speech_not_available">No speech recognition available on this device.</string>
+    <string name="speech_not_available_offline_hint">No speech recognition service on this device (e.g. Amazon FireOS). Enable the offline recognition in the settings.</string>
     <string name="speech_error_audio">Audio error during speech recognition.</string>
     <string name="speech_error_client">Internal error of the speech recognition.</string>
     <string name="speech_error_permissions">Microphone permission missing.</string>
@@ -68,6 +69,22 @@
     <string name="speech_error_language_unavailable">The recognition language is currently unavailable (language model not downloaded?).</string>
     <string name="speech_error_unknown">Unknown error (%1$d).</string>
     <string name="speech_no_match">Nothing understood – please speak again.</string>
+
+    <!-- Offline speech recognition (Vosk) -->
+    <string name="vosk_no_model_for_language">No offline model available for the language %1$s – please choose another language or the system recognition.</string>
+    <string name="vosk_downloading_started">Offline speech recognition: downloading model …</string>
+    <string name="vosk_downloading_progress">Offline speech recognition: downloading model … %1$d %%</string>
+    <string name="vosk_download_failed">Downloading the offline model failed (%1$s). Please check the internet connection and try again.</string>
+
+    <!-- Settings: speech recognition engine -->
+    <string name="settings_stt_engine">Speech recognition engine</string>
+    <string name="settings_stt_engine_hint">Automatic uses the system service when available (e.g. Google), otherwise the offline recognition (Vosk, on-device)</string>
+    <string name="stt_engine_auto_label">Automatic</string>
+    <string name="stt_engine_auto_desc">System service if available, otherwise offline (Vosk)</string>
+    <string name="stt_engine_system_label">System service</string>
+    <string name="stt_engine_system_desc">Device speech service (e.g. Google), requires internet</string>
+    <string name="stt_engine_offline_label">Offline (Vosk)</string>
+    <string name="stt_engine_offline_desc">On-device recognition, no speech service needed – first use downloads the language model (~40–50 MB)</string>
 
     <!-- Client / API texts -->
     <string name="client_no_server">No server URL configured. Please set it in the settings first.</string>

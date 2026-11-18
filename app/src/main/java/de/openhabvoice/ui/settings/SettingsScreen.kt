@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import de.openhabvoice.R
 import de.openhabvoice.data.AppSettings
 import de.openhabvoice.data.ChatMode
+import de.openhabvoice.data.SttEngine
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,7 +58,9 @@ fun SettingsScreen(
     var password by remember { mutableStateOf(current.password) }
     var ttsEnabled by remember { mutableStateOf(current.ttsEnabled) }
     var sttLanguage by remember { mutableStateOf(current.sttLanguage) }
+    var sttEngine by remember { mutableStateOf(current.sttEngine) }
     var modeMenuOpen by remember { mutableStateOf(false) }
+    var engineMenuOpen by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -92,7 +95,8 @@ fun SettingsScreen(
                                 username = username,
                                 password = password,
                                 ttsEnabled = ttsEnabled,
-                                sttLanguage = sttLanguage.ifBlank { "de-DE" }
+                                sttLanguage = sttLanguage.ifBlank { "de-DE" },
+                                sttEngine = sttEngine
                             )
                         )
                         onBack()
@@ -231,6 +235,46 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            ExposedDropdownMenuBox(
+                expanded = engineMenuOpen,
+                onExpandedChange = { engineMenuOpen = it }
+            ) {
+                OutlinedTextField(
+                    value = stringResource(sttEngine.labelRes),
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(stringResource(R.string.settings_stt_engine)) },
+                    supportingText = { Text(stringResource(R.string.settings_stt_engine_hint)) },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = engineMenuOpen) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor()
+                )
+                ExposedDropdownMenu(
+                    expanded = engineMenuOpen,
+                    onDismissRequest = { engineMenuOpen = false }
+                ) {
+                    SttEngine.entries.forEach { engine ->
+                        DropdownMenuItem(
+                            text = {
+                                Column {
+                                    Text(stringResource(engine.labelRes))
+                                    Text(
+                                        stringResource(engine.descRes),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            },
+                            onClick = {
+                                sttEngine = engine
+                                engineMenuOpen = false
+                            }
+                        )
+                    }
+                }
+            }
+
             Spacer(Modifier.height(16.dp))
         }
     }
@@ -261,4 +305,19 @@ private val ChatMode.descRes: Int
         ChatMode.HABOT -> R.string.mode_habot_desc
         ChatMode.VOICE -> R.string.mode_voice_desc
         ChatMode.CUSTOM -> R.string.mode_custom_desc
+    }
+
+/** Display texts of the STT engines as string resources (localized instead of in the enum). */
+private val SttEngine.labelRes: Int
+    get() = when (this) {
+        SttEngine.AUTO -> R.string.stt_engine_auto_label
+        SttEngine.SYSTEM -> R.string.stt_engine_system_label
+        SttEngine.OFFLINE -> R.string.stt_engine_offline_label
+    }
+
+private val SttEngine.descRes: Int
+    get() = when (this) {
+        SttEngine.AUTO -> R.string.stt_engine_auto_desc
+        SttEngine.SYSTEM -> R.string.stt_engine_system_desc
+        SttEngine.OFFLINE -> R.string.stt_engine_offline_desc
     }

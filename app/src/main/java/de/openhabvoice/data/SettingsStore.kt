@@ -34,6 +34,7 @@ class PrefsSettingsStore(context: Context) : SettingsStore {
             .putString(KEY_PASS, new.password)
             .putBoolean(KEY_TTS, new.ttsEnabled)
             .putString(KEY_LANG, new.sttLanguage)
+            .putString(KEY_STT_ENGINE, new.sttEngine.name)
             .putString(KEY_CONVERSATION, new.conversationId)
             .apply()
         _settings.value = new
@@ -45,6 +46,11 @@ class PrefsSettingsStore(context: Context) : SettingsStore {
         } catch (_: IllegalArgumentException) {
             ChatMode.OPENHAB5_CHAT
         }
+        val sttEngine = try {
+            SttEngine.valueOf(prefs.getString(KEY_STT_ENGINE, SttEngine.AUTO.name)!!)
+        } catch (_: IllegalArgumentException) {
+            SttEngine.AUTO
+        }
         return AppSettings(
             serverUrl = prefs.getString(KEY_URL, "") ?: "",
             chatMode = mode,
@@ -54,6 +60,7 @@ class PrefsSettingsStore(context: Context) : SettingsStore {
             password = prefs.getString(KEY_PASS, "") ?: "",
             ttsEnabled = prefs.getBoolean(KEY_TTS, true),
             sttLanguage = prefs.getString(KEY_LANG, "de-DE") ?: "de-DE",
+            sttEngine = sttEngine,
             conversationId = prefs.getString(KEY_CONVERSATION, "") ?: ""
         )
     }
@@ -67,6 +74,7 @@ class PrefsSettingsStore(context: Context) : SettingsStore {
         const val KEY_PASS = "password"
         const val KEY_TTS = "tts_enabled"
         const val KEY_LANG = "stt_language"
+        const val KEY_STT_ENGINE = "stt_engine"
         const val KEY_CONVERSATION = "conversation_id"
     }
 }

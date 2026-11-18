@@ -280,6 +280,7 @@ class ChatViewModelTest {
     private class FakeSpeech : SpeechEngine {
         override val isListening = MutableStateFlow(false)
         override val partial = MutableStateFlow("")
+        override val status = MutableStateFlow<String?>(null)
         override val error = MutableStateFlow<String?>(null)
         var startLanguage: String? = null
         var onResultCallback: ((String) -> Unit)? = null

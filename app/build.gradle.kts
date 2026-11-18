@@ -86,6 +86,9 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 
+    // Offline speech recognition (on-device, no speech service needed - e.g. Amazon FireOS)
+    implementation("com.alphacephei:vosk-android:0.3.75")
+
     // Markdown-Renderer (mikepenz) fuer Chat-Antworten
     implementation("com.mikepenz:multiplatform-markdown-renderer:0.35.0")
     implementation("com.mikepenz:multiplatform-markdown-renderer-m3:0.35.0")

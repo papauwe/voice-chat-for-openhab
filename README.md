@@ -16,6 +16,11 @@ Human Language Interpreter such as the ChatGPT binding) answers – as text and 
 ## Features
 
 - **Voice input** via the Android SpeechRecognizer (press-to-talk, partial results shown live)
+  - On devices **without a speech service** (e.g. Amazon FireOS tablets), an **offline
+    recognition engine ([Vosk](https://alphacephei.com/vosk/))** is used automatically
+    (setting *Speech recognition engine: Automatic*). The first use downloads the
+    small model for the configured language once (~40–50 MB); afterwards recognition
+    runs completely on-device. Force the system or offline engine in the settings if needed.
 - **Text-to-speech** for answers (can be toggled in the top bar)
 - **Multiple chat modes**:
   - *openHAB 5 Chat* – the Main-UI assistant (`POST /rest/voice/interpreters`), with
@@ -34,6 +39,15 @@ Human Language Interpreter such as the ChatGPT binding) answers – as text and 
 - Android 8.0+ (API 26)
 - An openHAB 5.x server. For the chat experience install the **HABot** add-on and/or an
   LLM-based Human Language Interpreter (e.g. the ChatGPT binding with an OpenRouter/OpenAI key).
+
+### Device compatibility
+
+- **Fire tablets (FireOS)**: work fully. FireOS ships without a speech recognition
+  service, so the app automatically uses the built-in offline recognition (Vosk).
+  The language model (~40–50 MB) is downloaded once on first use.
+- **Fire TV (Stick/Cube)**: **not supported for voice input** – these devices have no
+  microphone available to third-party apps, so speech recognition cannot work there.
+  You can still use the app with the on-screen keyboard.
 
 ## Building
 

@@ -55,6 +55,7 @@
 
     <!-- Spracherkennung -->
     <string name="speech_not_available">Keine Spracherkennung auf diesem Gerät verfügbar.</string>
+    <string name="speech_not_available_offline_hint">Kein Spracherkennungsdienst auf diesem Gerät (z. B. Amazon FireOS). Bitte in den Einstellungen die Offline-Erkennung aktivieren.</string>
     <string name="speech_error_audio">Audiofehler bei der Spracherkennung.</string>
     <string name="speech_error_client">Interner Fehler der Spracherkennung.</string>
     <string name="speech_error_permissions">Mikrofon-Berechtigung fehlt.</string>
@@ -68,6 +69,22 @@
     <string name="speech_error_language_unavailable">Die Erkennungssprache ist momentan nicht verfügbar (Sprachmodell nicht geladen?).</string>
     <string name="speech_error_unknown">Unbekannter Fehler (%1$d).</string>
     <string name="speech_no_match">Nichts verstanden – bitte nochmal sprechen.</string>
+
+    <!-- Offline-Spracherkennung (Vosk) -->
+    <string name="vosk_no_model_for_language">Kein Offline-Modell für die Sprache %1$s vorhanden – bitte eine andere Sprache wählen oder die Systemerkennung nutzen.</string>
+    <string name="vosk_downloading_started">Offline-Spracherkennung: Modell wird geladen …</string>
+    <string name="vosk_downloading_progress">Offline-Spracherkennung: Modell wird geladen … %1$d %%</string>
+    <string name="vosk_download_failed">Laden des Offline-Modells fehlgeschlagen (%1$s). Bitte Internetverbindung prüfen und erneut versuchen.</string>
+
+    <!-- Einstellungen: Spracherkennungs-Engine -->
+    <string name="settings_stt_engine">Spracherkennungs-Engine</string>
+    <string name="settings_stt_engine_hint">Automatisch nutzt den Systemdienst, wenn verfügbar (z. B. Google), sonst die Offline-Erkennung (Vosk, auf dem Gerät)</string>
+    <string name="stt_engine_auto_label">Automatisch</string>
+    <string name="stt_engine_auto_desc">Systemdienst, wenn verfügbar, sonst offline (Vosk)</string>
+    <string name="stt_engine_system_label">Systemdienst</string>
+    <string name="stt_engine_system_desc">Sprachdienst des Geräts (z. B. Google), braucht Internet</string>
+    <string name="stt_engine_offline_label">Offline (Vosk)</string>
+    <string name="stt_engine_offline_desc">Erkennung auf dem Gerät, kein Sprachdienst nötig – erste Nutzung lädt das Sprachmodell (~40–50 MB)</string>
 
     <!-- Client / API-Texte -->
     <string name="client_no_server">Keine Server-URL konfiguriert. Bitte zuerst in den Einstellungen setzen.</string>

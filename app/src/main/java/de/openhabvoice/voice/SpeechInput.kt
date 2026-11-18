@@ -21,6 +21,14 @@ interface SpeechEngine {
     val isListening: StateFlow<Boolean>
     val partial: StateFlow<String>
     val error: StateFlow<String?>
+
+    /**
+     * Optional non-blocking status message (e.g. "model is being downloaded"),
+     * null when there is nothing to report. Implementations without a status
+     * keep this flow constantly null.
+     */
+    val status: StateFlow<String?>
+
     fun start(language: String, onResult: (String) -> Unit)
     fun stop()
     fun release()
@@ -47,6 +55,9 @@ class SpeechInput(private val context: Context) : SpeechEngine {
 
     private val _error = MutableStateFlow<String?>(null)
     override val error: StateFlow<String?> = _error.asStateFlow()
+
+    private val _status = MutableStateFlow<String?>(null)
+    override val status: StateFlow<String?> = _status.asStateFlow()
 
     private var recognizer: SpeechRecognizer? = null
     private var onResult: ((String) -> Unit)? = null
