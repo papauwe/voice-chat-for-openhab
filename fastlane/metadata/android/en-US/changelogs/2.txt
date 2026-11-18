@@ -1,0 +1,3 @@
+- Fix voice input error handling: proper messages for new Android recognizer error codes and automatic retry of transient failures
+- Offline speech recognition fallback (Vosk) for devices without a speech recognition service, e.g. Amazon FireOS
+- Selectable color scheme: presets plus Material You dynamic colors
