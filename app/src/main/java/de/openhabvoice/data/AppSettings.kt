@@ -16,7 +16,9 @@ data class AppSettings(
     /** Which speech recognition engine to use (system service or offline Vosk). */
     val sttEngine: SttEngine = SttEngine.AUTO,
     /** Conversation ID for the openHAB 5 chat (context is kept server-side per ID) */
-    val conversationId: String = ""
+    val conversationId: String = "",
+    /** Accent color scheme of the app (see [AppTheme]) */
+    val appTheme: AppTheme = AppTheme.OPENHAB
 ) {
     val hasServer: Boolean get() = serverUrl.isNotBlank()
 }

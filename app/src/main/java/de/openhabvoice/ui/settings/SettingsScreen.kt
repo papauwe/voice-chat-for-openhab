@@ -40,6 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.openhabvoice.R
 import de.openhabvoice.data.AppSettings
+import de.openhabvoice.data.AppTheme
 import de.openhabvoice.data.ChatMode
 import de.openhabvoice.data.SttEngine
 
@@ -59,8 +60,10 @@ fun SettingsScreen(
     var ttsEnabled by remember { mutableStateOf(current.ttsEnabled) }
     var sttLanguage by remember { mutableStateOf(current.sttLanguage) }
     var sttEngine by remember { mutableStateOf(current.sttEngine) }
+    var appTheme by remember { mutableStateOf(current.appTheme) }
     var modeMenuOpen by remember { mutableStateOf(false) }
     var engineMenuOpen by remember { mutableStateOf(false) }
+    var themeMenuOpen by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -96,7 +99,8 @@ fun SettingsScreen(
                                 password = password,
                                 ttsEnabled = ttsEnabled,
                                 sttLanguage = sttLanguage.ifBlank { "de-DE" },
-                                sttEngine = sttEngine
+                                sttEngine = sttEngine,
+                                appTheme = appTheme
                             )
                         )
                         onBack()
@@ -275,6 +279,48 @@ fun SettingsScreen(
                 }
             }
 
+            SectionTitle(stringResource(R.string.settings_section_appearance))
+
+            ExposedDropdownMenuBox(
+                expanded = themeMenuOpen,
+                onExpandedChange = { themeMenuOpen = it }
+            ) {
+                OutlinedTextField(
+                    value = stringResource(appTheme.labelRes),
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(stringResource(R.string.settings_app_theme)) },
+                    supportingText = { Text(stringResource(R.string.settings_app_theme_hint)) },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = themeMenuOpen) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor()
+                )
+                ExposedDropdownMenu(
+                    expanded = themeMenuOpen,
+                    onDismissRequest = { themeMenuOpen = false }
+                ) {
+                    AppTheme.entries.forEach { theme ->
+                        DropdownMenuItem(
+                            text = {
+                                Column {
+                                    Text(stringResource(theme.labelRes))
+                                    Text(
+                                        stringResource(theme.descRes),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            },
+                            onClick = {
+                                appTheme = theme
+                                themeMenuOpen = false
+                            }
+                        )
+                    }
+                }
+            }
+
             Spacer(Modifier.height(16.dp))
         }
     }
@@ -320,4 +366,23 @@ private val SttEngine.descRes: Int
         SttEngine.AUTO -> R.string.stt_engine_auto_desc
         SttEngine.SYSTEM -> R.string.stt_engine_system_desc
         SttEngine.OFFLINE -> R.string.stt_engine_offline_desc
+    }
+
+/** Display texts of the app themes as string resources (localized instead of in the enum). */
+private val AppTheme.labelRes: Int
+    get() = when (this) {
+        AppTheme.OPENHAB -> R.string.theme_openhab_label
+        AppTheme.BLUE -> R.string.theme_blue_label
+        AppTheme.GREEN -> R.string.theme_green_label
+        AppTheme.VIOLET -> R.string.theme_violet_label
+        AppTheme.DYNAMIC -> R.string.theme_dynamic_label
+    }
+
+private val AppTheme.descRes: Int
+    get() = when (this) {
+        AppTheme.OPENHAB -> R.string.theme_openhab_desc
+        AppTheme.BLUE -> R.string.theme_blue_desc
+        AppTheme.GREEN -> R.string.theme_green_desc
+        AppTheme.VIOLET -> R.string.theme_violet_desc
+        AppTheme.DYNAMIC -> R.string.theme_dynamic_desc
     }

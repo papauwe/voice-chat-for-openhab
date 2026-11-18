@@ -36,7 +36,9 @@ class SettingsStoreTest {
                 password = "pw",
                 ttsEnabled = false,
                 sttLanguage = "en-US",
+                sttEngine = SttEngine.OFFLINE,
                 conversationId = "conv-1",
+                appTheme = AppTheme.BLUE,
             )
         )
         val s = PrefsSettingsStore(context).settings.value
@@ -49,6 +51,7 @@ class SettingsStoreTest {
         assertEquals(false, s.ttsEnabled)
         assertEquals("en-US", s.sttLanguage)
         assertEquals("conv-1", s.conversationId)
+        assertEquals(AppTheme.BLUE, s.appTheme)
     }
 
     @Test
@@ -59,6 +62,7 @@ class SettingsStoreTest {
         assertEquals(true, s.ttsEnabled)
         assertEquals("de-DE", s.sttLanguage)
         assertEquals("", s.conversationId)
+        assertEquals(AppTheme.OPENHAB, s.appTheme)
     }
 
     @Test
@@ -67,5 +71,13 @@ class SettingsStoreTest {
             .edit().putString("chat_mode", "GIBTS_NICHT").commit()
         val s = PrefsSettingsStore(context).settings.value
         assertEquals(ChatMode.OPENHAB5_CHAT, s.chatMode)
+    }
+
+    @Test
+    fun `invalid AppTheme in prefs falls back to OPENHAB`() {
+        context.getSharedPreferences("openhab_voice_prefs", Context.MODE_PRIVATE)
+            .edit().putString("app_theme", "GIBTS_NICHT").commit()
+        val s = PrefsSettingsStore(context).settings.value
+        assertEquals(AppTheme.OPENHAB, s.appTheme)
     }
 }

@@ -36,6 +36,7 @@ class PrefsSettingsStore(context: Context) : SettingsStore {
             .putString(KEY_LANG, new.sttLanguage)
             .putString(KEY_STT_ENGINE, new.sttEngine.name)
             .putString(KEY_CONVERSATION, new.conversationId)
+            .putString(KEY_APP_THEME, new.appTheme.name)
             .apply()
         _settings.value = new
     }
@@ -51,6 +52,11 @@ class PrefsSettingsStore(context: Context) : SettingsStore {
         } catch (_: IllegalArgumentException) {
             SttEngine.AUTO
         }
+        val appTheme = try {
+            AppTheme.valueOf(prefs.getString(KEY_APP_THEME, AppTheme.OPENHAB.name)!!)
+        } catch (_: IllegalArgumentException) {
+            AppTheme.OPENHAB
+        }
         return AppSettings(
             serverUrl = prefs.getString(KEY_URL, "") ?: "",
             chatMode = mode,
@@ -61,7 +67,8 @@ class PrefsSettingsStore(context: Context) : SettingsStore {
             ttsEnabled = prefs.getBoolean(KEY_TTS, true),
             sttLanguage = prefs.getString(KEY_LANG, "de-DE") ?: "de-DE",
             sttEngine = sttEngine,
-            conversationId = prefs.getString(KEY_CONVERSATION, "") ?: ""
+            conversationId = prefs.getString(KEY_CONVERSATION, "") ?: "",
+            appTheme = appTheme
         )
     }
 
@@ -76,5 +83,6 @@ class PrefsSettingsStore(context: Context) : SettingsStore {
         const val KEY_LANG = "stt_language"
         const val KEY_STT_ENGINE = "stt_engine"
         const val KEY_CONVERSATION = "conversation_id"
+        const val KEY_APP_THEME = "app_theme"
     }
 }

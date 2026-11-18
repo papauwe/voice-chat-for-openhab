@@ -86,6 +86,21 @@
     <string name="stt_engine_offline_label">Offline (Vosk)</string>
     <string name="stt_engine_offline_desc">Erkennung auf dem Gerät, kein Sprachdienst nötig – erste Nutzung lädt das Sprachmodell (~40–50 MB)</string>
 
+    <!-- Einstellungen: Darstellung -->
+    <string name="settings_section_appearance">Darstellung</string>
+    <string name="settings_app_theme">Farbschema</string>
+    <string name="settings_app_theme_hint">Akzentfarbe der App, wird nach dem Speichern sofort übernommen</string>
+    <string name="theme_openhab_label">openHAB-Orange</string>
+    <string name="theme_openhab_desc">Klassischer openHAB-Look (Standard)</string>
+    <string name="theme_blue_label">Blau</string>
+    <string name="theme_blue_desc">Ruhige blaue Akzentfarben</string>
+    <string name="theme_green_label">Grün</string>
+    <string name="theme_green_desc">Frische grüne Akzentfarben</string>
+    <string name="theme_violet_label">Violett</string>
+    <string name="theme_violet_desc">Violette Akzentfarben</string>
+    <string name="theme_dynamic_label">Dynamisch (Material You)</string>
+    <string name="theme_dynamic_desc">Persönliche Systemfarben aus dem Hintergrundbild (Android 12+), sonst openHAB-Orange</string>
+
     <!-- Client / API-Texte -->
     <string name="client_no_server">Keine Server-URL konfiguriert. Bitte zuerst in den Einstellungen setzen.</string>
     <string name="client_command_sent">✅ Befehl an openHAB gesendet.</string>

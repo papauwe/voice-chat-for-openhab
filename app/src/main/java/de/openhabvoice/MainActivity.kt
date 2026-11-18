@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,7 +30,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            OpenHabVoiceTheme {
+            // Live theme: the accent from the settings flow applies immediately
+            // after saving (no app restart needed).
+            val settings by viewModel.settings.collectAsState()
+            OpenHabVoiceTheme(accent = settings.appTheme) {
                 var showSettings by remember { mutableStateOf(false) }
 
                 // Widget invocation: start listening immediately on open
